@@ -66,9 +66,7 @@ import {IB20} from "./IB20.sol";
 ///         The `REDEEMER_SENDER` policy slot is typically pointed at an
 ///         ALLOWLIST of brokerage-verified holders (Coinbase adds
 ///         addresses to this allowlist as users complete KYC and connect
-///         a valid brokerage account). Capability bits relevant to
-///         assets live in the `Capabilities` library bits 16..23
-///         (e.g. `ASSET_CREATABLE`, `SHARE_RATIO_MUTABLE`).
+///         a valid brokerage account).
 interface IB20Asset is IB20 {
     /*//////////////////////////////////////////////////////////////
                                  ERRORS

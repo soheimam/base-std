@@ -170,15 +170,8 @@ contract B20AssetAnnounceTest is B20AssetTest {
         _announce(operator, new bytes[](0), id, "desc", "uri");
 
         Vm.Log[] memory logs = vm.getRecordedLogs();
-        bytes32 headerSig = IB20Asset.Announcement.selector;
-        bytes32 footerSig = IB20Asset.EndAnnouncement.selector;
-        int256 headerAt = -1;
-        int256 footerAt = -1;
-        for (uint256 i = 0; i < logs.length; i++) {
-            if (logs[i].topics.length == 0) continue;
-            if (logs[i].topics[0] == headerSig && headerAt < 0) headerAt = int256(i);
-            if (logs[i].topics[0] == footerSig && footerAt < 0) footerAt = int256(i);
-        }
+        int256 headerAt = _firstLogIndex(logs, IB20Asset.Announcement.selector);
+        int256 footerAt = _firstLogIndex(logs, IB20Asset.EndAnnouncement.selector);
         assertGt(headerAt, -1, "Announcement must be present");
         assertGt(footerAt, -1, "EndAnnouncement must be present");
         assertLt(headerAt, footerAt, "Announcement must precede EndAnnouncement");

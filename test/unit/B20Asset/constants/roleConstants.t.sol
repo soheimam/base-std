@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {B20AssetTest} from "test/lib/B20AssetTest.sol";
+import {B20Constants} from "src/lib/B20Constants.sol";
 
 contract B20AssetRoleConstantsTest is B20AssetTest {
     /// @notice Verifies OPERATOR_ROLE equals keccak256("OPERATOR_ROLE")
@@ -29,6 +30,11 @@ contract B20AssetRoleConstantsTest is B20AssetTest {
             "BURN_FROM_ROLE must equal keccak256(\"BURN_FROM_ROLE\")"
         );
         assertEq(security().BURN_FROM_ROLE(), BURN_FROM_ROLE, "compile-time copy in B20AssetTest must match");
+        assertEq(
+            security().BURN_FROM_ROLE(),
+            B20Constants.BURN_FROM_ROLE,
+            "B20Constants.BURN_FROM_ROLE library source-of-truth must match"
+        );
     }
 
     /// @notice Verifies the two variant role identifiers are distinct

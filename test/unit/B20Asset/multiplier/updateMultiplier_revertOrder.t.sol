@@ -5,15 +5,15 @@ import {IB20} from "src/interfaces/IB20.sol";
 
 import {B20AssetTest} from "test/lib/B20AssetTest.sol";
 
-/// @title Sequential revert-order test for `updateShareRatio`.
+/// @title Sequential revert-order test for `updateMultiplier`.
 ///
 /// @notice **Canonical order (Solidity reference):**
 ///         1. ROLE (`onlyRole(OPERATOR_ROLE)` modifier) → `AccessControlUnauthorizedAccount`
 ///
 ///         A single test verifies the guard fires for an unauthorized caller and then
 ///         confirms the call succeeds once the role is granted.
-contract B20AssetUpdateShareRatioRevertOrderTest is B20AssetTest {
-    function test_updateShareRatio_revertOrder(address caller, uint256 newRatio) public {
+contract B20AssetUpdateMultiplierRevertOrderTest is B20AssetTest {
+    function test_updateMultiplier_revertOrder(address caller, uint256 newMultiplier) public {
         // Exclude precompiles (which can distort msg.sender) and admin (needed
         // internally by _grantRole to approve the role grant).
         _assumeValidCaller(caller);
@@ -27,13 +27,13 @@ contract B20AssetUpdateShareRatioRevertOrderTest is B20AssetTest {
         // 1. ROLE fires.
         vm.prank(caller);
         vm.expectRevert(abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, operatorRole));
-        security().updateShareRatio(newRatio);
+        security().updateMultiplier(newMultiplier);
 
         // Fix: grant OPERATOR_ROLE to caller.
         _grantRole(operatorRole, caller);
 
         // Success: all conditions resolved.
         vm.prank(caller);
-        security().updateShareRatio(newRatio);
+        security().updateMultiplier(newMultiplier);
     }
 }

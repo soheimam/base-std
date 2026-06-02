@@ -202,10 +202,10 @@ library B20FactoryLib {
         return abi.encodeCall(IB20Asset.updateExtraMetadata, (identifierType, value));
     }
 
-    /// @notice Encodes a bootstrap initCall to `IB20Asset.updateShareRatio`.
-    /// @param newShareRatio New shares-to-tokens ratio, scaled to `WAD_PRECISION`.
-    function encodeUpdateShareRatio(uint256 newShareRatio) internal pure returns (bytes memory) {
-        return abi.encodeCall(IB20Asset.updateShareRatio, (newShareRatio));
+    /// @notice Encodes a bootstrap initCall to `IB20Asset.updateMultiplier`.
+    /// @param newMultiplier New multiplier, scaled to `WAD_PRECISION`.
+    function encodeUpdateMultiplier(uint256 newMultiplier) internal pure returns (bytes memory) {
+        return abi.encodeCall(IB20Asset.updateMultiplier, (newMultiplier));
     }
 
     /*//////////////////////////////////////////////////////////////

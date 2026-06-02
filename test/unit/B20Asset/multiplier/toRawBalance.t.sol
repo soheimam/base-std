@@ -7,8 +7,8 @@ contract B20AssetToRawBalanceTest is B20AssetTest {
     /// @notice Verifies toRawBalance is the identity on a fresh token (WAD multiplier)
     /// @dev Default multiplier is WAD, so scaledBalance * WAD / WAD == scaledBalance for every input.
     function test_toRawBalance_success_identityOnWadDefault(uint256 scaledBalance) public view {
-        scaledBalance = bound(scaledBalance, 0, type(uint256).max / security().WAD_PRECISION());
-        assertEq(security().toRawBalance(scaledBalance), scaledBalance, "default multiplier must produce identity");
+        scaledBalance = bound(scaledBalance, 0, type(uint256).max / asset().WAD_PRECISION());
+        assertEq(asset().toRawBalance(scaledBalance), scaledBalance, "default multiplier must produce identity");
     }
 
     /// @notice Verifies toRawBalance inverts the stored multiplier after an update
@@ -19,8 +19,8 @@ contract B20AssetToRawBalanceTest is B20AssetTest {
         newMultiplier = bound(newMultiplier, 1, type(uint128).max);
         _updateMultiplier(newMultiplier);
         assertEq(
-            security().toRawBalance(scaledBalance),
-            (scaledBalance * security().WAD_PRECISION()) / newMultiplier,
+            asset().toRawBalance(scaledBalance),
+            (scaledBalance * asset().WAD_PRECISION()) / newMultiplier,
             "toRawBalance must apply scaledBalance * WAD / multiplier"
         );
     }
@@ -30,7 +30,7 @@ contract B20AssetToRawBalanceTest is B20AssetTest {
     function test_toRawBalance_success_zeroScaledBalance(uint256 newMultiplier) public {
         newMultiplier = bound(newMultiplier, 1, type(uint256).max);
         _updateMultiplier(newMultiplier);
-        assertEq(security().toRawBalance(0), 0, "zero scaled balance must produce zero raw balance");
+        assertEq(asset().toRawBalance(0), 0, "zero scaled balance must produce zero raw balance");
     }
 
     /// @notice Verifies toRawBalance applies the WAD fallback when the stored multiplier is explicitly zero
@@ -43,7 +43,7 @@ contract B20AssetToRawBalanceTest is B20AssetTest {
         _updateMultiplier(5e18); // seed a non-zero value first
         _updateMultiplier(0); // then explicitly clear back to zero
         assertEq(
-            security().toRawBalance(scaledBalance),
+            asset().toRawBalance(scaledBalance),
             scaledBalance,
             "stored zero multiplier must produce identity (WAD fallback)"
         );
@@ -53,9 +53,9 @@ contract B20AssetToRawBalanceTest is B20AssetTest {
     /// @dev With multiplier == WAD, both directions collapse to the identity, so the round-trip
     ///      is exact.
     function test_toRawBalance_success_roundTripExactOnWadDefault(uint256 rawBalance) public view {
-        rawBalance = bound(rawBalance, 0, type(uint256).max / security().WAD_PRECISION());
-        uint256 scaled = security().toScaledBalance(rawBalance);
-        assertEq(security().toRawBalance(scaled), rawBalance, "round-trip must be exact at WAD multiplier");
+        rawBalance = bound(rawBalance, 0, type(uint256).max / asset().WAD_PRECISION());
+        uint256 scaled = asset().toScaledBalance(rawBalance);
+        assertEq(asset().toRawBalance(scaled), rawBalance, "round-trip must be exact at WAD multiplier");
     }
 
     /// @notice Verifies the round-trip toRawBalance(toScaledBalance(x)) <= x for arbitrary multipliers
@@ -68,10 +68,10 @@ contract B20AssetToRawBalanceTest is B20AssetTest {
         // Bound the multiplier strictly below WAD to actually exercise the floor — at multipliers
         // >= WAD the forward leg loses nothing, so the round-trip is exact and uninteresting.
         rawBalance = bound(rawBalance, 0, type(uint128).max);
-        newMultiplier = bound(newMultiplier, 1, security().WAD_PRECISION() - 1);
+        newMultiplier = bound(newMultiplier, 1, asset().WAD_PRECISION() - 1);
         _updateMultiplier(newMultiplier);
-        uint256 scaled = security().toScaledBalance(rawBalance);
-        uint256 roundTripped = security().toRawBalance(scaled);
+        uint256 scaled = asset().toScaledBalance(rawBalance);
+        uint256 roundTripped = asset().toRawBalance(scaled);
         assertLe(roundTripped, rawBalance, "round-trip must not exceed input (floors at each step)");
     }
 }

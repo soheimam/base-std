@@ -734,7 +734,7 @@ abstract contract MockB20 is IB20 {
 
     /// @dev Pure mechanics: policy (with bootstrap bypass) + supply cap
     ///      + effects. Pause, role, and the zero-receiver check are
-    ///      enforced upstream by `mint` / `mintWithMemo`. The security
+    ///      enforced upstream by `mint` / `mintWithMemo`. The asset
     ///      variant's `batchMint` carries the same `whenNotPaused` +
     ///      `onlyRole` modifiers ONCE for the whole batch and validates
     ///      per-element receivers inline before invoking this helper.

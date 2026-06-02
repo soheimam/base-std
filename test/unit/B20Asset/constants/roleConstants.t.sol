@@ -11,17 +11,13 @@ contract B20AssetRoleConstantsTest is B20AssetTest {
     ///      drift would silently break operator role checks across implementations.
     function test_operatorRole_success_matchesKeccak() public view {
         assertEq(
-            security().OPERATOR_ROLE(),
-            keccak256("OPERATOR_ROLE"),
-            "OPERATOR_ROLE must equal keccak256(\"OPERATOR_ROLE\")"
+            asset().OPERATOR_ROLE(), keccak256("OPERATOR_ROLE"), "OPERATOR_ROLE must equal keccak256(\"OPERATOR_ROLE\")"
         );
         assertEq(
-            security().OPERATOR_ROLE(),
-            OPERATOR_ROLE,
-            "compile-time copy in B20AssetTest must match the contract value"
+            asset().OPERATOR_ROLE(), OPERATOR_ROLE, "compile-time copy in B20AssetTest must match the contract value"
         );
         assertEq(
-            security().OPERATOR_ROLE(),
+            asset().OPERATOR_ROLE(),
             B20Constants.OPERATOR_ROLE,
             "B20Constants.OPERATOR_ROLE library source-of-truth must match"
         );

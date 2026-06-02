@@ -40,7 +40,7 @@ contract B20AssetAnnounceRevertOrderTest is B20AssetTest {
 
         vm.prank(caller);
         vm.expectRevert(abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, OPERATOR_ROLE));
-        security().announce(new bytes[](0), id, "desc", "uri");
+        asset().announce(new bytes[](0), id, "desc", "uri");
     }
 
     function test_announce_revertOrder_role_beats_malformedInnerCall(address caller, string calldata id) public {
@@ -51,7 +51,7 @@ contract B20AssetAnnounceRevertOrderTest is B20AssetTest {
 
         vm.prank(caller);
         vm.expectRevert(abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, OPERATOR_ROLE));
-        security().announce(_singletonBytes(MALFORMED_BLOB), id, "desc", "uri");
+        asset().announce(_singletonBytes(MALFORMED_BLOB), id, "desc", "uri");
     }
 
     // --- Pair where ID-ALREADY-USED wins ---
@@ -63,7 +63,7 @@ contract B20AssetAnnounceRevertOrderTest is B20AssetTest {
 
         vm.prank(operator);
         vm.expectRevert(abi.encodeWithSelector(IB20Asset.AnnouncementIdAlreadyUsed.selector, id));
-        security().announce(_singletonBytes(MALFORMED_BLOB), id, "desc", "uri");
+        asset().announce(_singletonBytes(MALFORMED_BLOB), id, "desc", "uri");
     }
 
     // --- Per-element ordering ---
@@ -79,6 +79,6 @@ contract B20AssetAnnounceRevertOrderTest is B20AssetTest {
 
         vm.prank(operator);
         vm.expectRevert(abi.encodeWithSelector(IB20Asset.InternalCallMalformed.selector, MALFORMED_BLOB));
-        security().announce(calls, id, "desc", "uri");
+        asset().announce(calls, id, "desc", "uri");
     }
 }

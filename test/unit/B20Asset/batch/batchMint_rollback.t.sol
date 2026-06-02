@@ -56,7 +56,7 @@ contract B20AssetBatchMintRollbackTest is B20AssetTest {
 
         vm.prank(minter);
         vm.expectRevert(abi.encodeWithSelector(IB20.SupplyCapExceeded.selector, cap, a1 + a2));
-        security().batchMint(recipients, amounts);
+        asset().batchMint(recipients, amounts);
 
         // Element 0's mint must have been rolled back by the journal.
         assertEq(token.balanceOf(alice), aliceBefore, "alice balance must be unchanged after rollback");

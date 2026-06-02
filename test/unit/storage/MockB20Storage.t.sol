@@ -57,11 +57,11 @@ contract MockB20StorageLocationTest is Test {
         );
         assertTrue(
             MockB20Storage.STORAGE_LOCATION != MockB20AssetStorage.STORAGE_LOCATION,
-            "base and security namespaces must derive to disjoint roots"
+            "base and asset namespaces must derive to disjoint roots"
         );
         assertTrue(
             MockB20StablecoinStorage.STORAGE_LOCATION != MockB20AssetStorage.STORAGE_LOCATION,
-            "stablecoin and security namespaces must derive to disjoint roots"
+            "stablecoin and asset namespaces must derive to disjoint roots"
         );
     }
 }

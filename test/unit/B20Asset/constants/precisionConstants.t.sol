@@ -9,6 +9,6 @@ contract B20AssetPrecisionConstantsTest is B20AssetTest {
     ///      multiplying by the stored multiplier (and `toRawBalance` multiplies by this before
     ///      dividing); any drift silently rescales every holder's scaled balance.
     function test_wadPrecision_success_equalsOneWad() public view {
-        assertEq(security().WAD_PRECISION(), 1e18, "WAD_PRECISION must equal 1e18");
+        assertEq(asset().WAD_PRECISION(), 1e18, "WAD_PRECISION must equal 1e18");
     }
 }

@@ -21,7 +21,7 @@ contract B20AssetAnnounceTest is B20AssetTest {
 
         vm.prank(caller);
         vm.expectRevert(abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, OPERATOR_ROLE));
-        security().announce(new bytes[](0), id, "desc", "uri");
+        asset().announce(new bytes[](0), id, "desc", "uri");
     }
 
     /// @notice Verifies announce reverts when an id has already been consumed
@@ -31,7 +31,7 @@ contract B20AssetAnnounceTest is B20AssetTest {
         _announce(id);
         vm.prank(operator);
         vm.expectRevert(abi.encodeWithSelector(IB20Asset.AnnouncementIdAlreadyUsed.selector, id));
-        security().announce(new bytes[](0), id, "desc", "uri");
+        asset().announce(new bytes[](0), id, "desc", "uri");
     }
 
     /// @notice Verifies announce reverts when an internalCalls blob is shorter than 4 bytes
@@ -43,7 +43,7 @@ contract B20AssetAnnounceTest is B20AssetTest {
 
         vm.prank(operator);
         vm.expectRevert(abi.encodeWithSelector(IB20Asset.InternalCallMalformed.selector, shortBlob));
-        security().announce(_singletonBytes(shortBlob), "id-malformed", "desc", "uri");
+        asset().announce(_singletonBytes(shortBlob), "id-malformed", "desc", "uri");
     }
 
     /// @notice Verifies announce reverts when an internalCall re-invokes announce itself
@@ -58,7 +58,7 @@ contract B20AssetAnnounceTest is B20AssetTest {
 
         vm.prank(operator);
         vm.expectRevert(IB20Asset.AnnouncementInProgress.selector);
-        security().announce(inner, "outer", "desc", "uri");
+        asset().announce(inner, "outer", "desc", "uri");
     }
 
     /// @notice Verifies a failing inner call reverts the entire announcement
@@ -73,7 +73,7 @@ contract B20AssetAnnounceTest is B20AssetTest {
 
         vm.prank(operator);
         vm.expectRevert(abi.encodeWithSelector(IB20Asset.InternalCallFailed.selector, failingCall));
-        security().announce(_singletonBytes(failingCall), "fail-id", "desc", "uri");
+        asset().announce(_singletonBytes(failingCall), "fail-id", "desc", "uri");
     }
 
     /// @notice Verifies a failed announcement does NOT consume the id (atomicity)
@@ -85,22 +85,22 @@ contract B20AssetAnnounceTest is B20AssetTest {
         bytes memory failingCall = abi.encodeWithSelector(IB20.updateName.selector, "rebrand");
 
         vm.prank(operator);
-        try security().announce(_singletonBytes(failingCall), "atomic-id", "desc", "uri") {
+        try asset().announce(_singletonBytes(failingCall), "atomic-id", "desc", "uri") {
             revert("expected revert");
         } catch { /* expected */ }
 
-        assertFalse(security().isAnnouncementIdUsed("atomic-id"), "failed announce must not consume the id");
+        assertFalse(asset().isAnnouncementIdUsed("atomic-id"), "failed announce must not consume the id");
 
         // The same id can now be reused successfully.
         _announce("atomic-id");
-        assertTrue(security().isAnnouncementIdUsed("atomic-id"), "second announce must consume the id");
+        assertTrue(asset().isAnnouncementIdUsed("atomic-id"), "second announce must consume the id");
     }
 
     /// @notice Verifies pure-announcement (empty internalCalls) succeeds and marks id used
     /// @dev Disclosure-only path: no inner calls, just the surrounding event pair.
     function test_announce_success_pureDisclosure(string calldata id) public {
         _announce(id);
-        assertTrue(security().isAnnouncementIdUsed(id), "pure announce must consume the id");
+        assertTrue(asset().isAnnouncementIdUsed(id), "pure announce must consume the id");
     }
 
     /// @notice Verifies announce executes a single inner call against the token via delegatecall
@@ -184,6 +184,6 @@ contract B20AssetAnnounceTest is B20AssetTest {
     ///      invariant: `isAnnouncementIdUsed(id)` is true at the end of the call.
     function test_announce_success_marksIdConsumed(string calldata id) public {
         _announce(id);
-        assertTrue(security().isAnnouncementIdUsed(id), "id must be marked consumed after success");
+        assertTrue(asset().isAnnouncementIdUsed(id), "id must be marked consumed after success");
     }
 }

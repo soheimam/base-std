@@ -47,7 +47,7 @@ contract B20AssetBatchMintRevertOrderTest is B20AssetTest {
 
         vm.prank(caller);
         vm.expectRevert(abi.encodeWithSelector(IB20.ContractPaused.selector, IB20.PausableFeature.MINT));
-        security().batchMint(_twoAddrs, _twoUints);
+        asset().batchMint(_twoAddrs, _twoUints);
     }
 
     /// @notice PAUSE beats LENGTH_MISMATCH.
@@ -57,7 +57,7 @@ contract B20AssetBatchMintRevertOrderTest is B20AssetTest {
 
         vm.prank(minter);
         vm.expectRevert(abi.encodeWithSelector(IB20.ContractPaused.selector, IB20.PausableFeature.MINT));
-        security().batchMint(_twoAddrs, _twoUints);
+        asset().batchMint(_twoAddrs, _twoUints);
     }
 
     /// @notice PAUSE beats EMPTY_BATCH.
@@ -67,7 +67,7 @@ contract B20AssetBatchMintRevertOrderTest is B20AssetTest {
 
         vm.prank(minter);
         vm.expectRevert(abi.encodeWithSelector(IB20.ContractPaused.selector, IB20.PausableFeature.MINT));
-        security().batchMint(_emptyAddrs, _emptyUints);
+        asset().batchMint(_emptyAddrs, _emptyUints);
     }
 
     // --- Pairs where ROLE wins (PAUSE not violated) ---
@@ -83,7 +83,7 @@ contract B20AssetBatchMintRevertOrderTest is B20AssetTest {
         vm.expectRevert(
             abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, B20Constants.MINT_ROLE)
         );
-        security().batchMint(_twoAddrs, _twoUints);
+        asset().batchMint(_twoAddrs, _twoUints);
     }
 
     /// @notice ROLE beats EMPTY_BATCH.
@@ -96,7 +96,7 @@ contract B20AssetBatchMintRevertOrderTest is B20AssetTest {
         vm.expectRevert(
             abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, B20Constants.MINT_ROLE)
         );
-        security().batchMint(_emptyAddrs, _emptyUints);
+        asset().batchMint(_emptyAddrs, _emptyUints);
     }
 
     // --- Pairs where LENGTH_MISMATCH / EMPTY_BATCH win (PAUSE + ROLE satisfied) ---
@@ -109,7 +109,7 @@ contract B20AssetBatchMintRevertOrderTest is B20AssetTest {
 
         vm.prank(minter);
         vm.expectRevert(abi.encodeWithSelector(IB20Asset.LengthMismatch.selector, uint256(2), uint256(1)));
-        security().batchMint(_twoAddrs, _twoUints);
+        asset().batchMint(_twoAddrs, _twoUints);
     }
 
     /// @notice EMPTY_BATCH beats per-element `_mint` body checks.
@@ -118,6 +118,6 @@ contract B20AssetBatchMintRevertOrderTest is B20AssetTest {
 
         vm.prank(minter);
         vm.expectRevert(IB20Asset.EmptyBatch.selector);
-        security().batchMint(_emptyAddrs, _emptyUints);
+        asset().batchMint(_emptyAddrs, _emptyUints);
     }
 }

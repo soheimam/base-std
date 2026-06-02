@@ -19,7 +19,7 @@ contract B20AssetUpdateMultiplierTest is B20AssetTest {
 
         vm.prank(caller);
         vm.expectRevert(abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, OPERATOR_ROLE));
-        security().updateMultiplier(newMultiplier);
+        asset().updateMultiplier(newMultiplier);
     }
 
     /// @notice Verifies updateMultiplier writes the new value to the stored slot
@@ -43,6 +43,6 @@ contract B20AssetUpdateMultiplierTest is B20AssetTest {
         vm.expectEmit(false, false, false, true, address(token));
         emit IB20Asset.MultiplierUpdated(newMultiplier);
         vm.prank(operator);
-        security().updateMultiplier(newMultiplier);
+        asset().updateMultiplier(newMultiplier);
     }
 }

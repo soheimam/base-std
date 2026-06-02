@@ -10,7 +10,7 @@ contract B20AssetScaledBalanceOfTest is B20AssetTest {
         _assumeValidActor(account);
         newMultiplier = bound(newMultiplier, 1, type(uint256).max);
         _updateMultiplier(newMultiplier);
-        assertEq(security().scaledBalanceOf(account), 0, "empty account must have zero scaled balance");
+        assertEq(asset().scaledBalanceOf(account), 0, "empty account must have zero scaled balance");
     }
 
     /// @notice Verifies scaledBalanceOf returns the balance unchanged on the default WAD multiplier
@@ -20,11 +20,11 @@ contract B20AssetScaledBalanceOfTest is B20AssetTest {
         amount = bound(amount, 0, type(uint128).max);
         if (amount > 0) _mint(account, amount);
         assertEq(
-            security().scaledBalanceOf(account),
+            asset().scaledBalanceOf(account),
             token.balanceOf(account),
             "default multiplier: scaledBalanceOf == balanceOf"
         );
-        assertEq(security().scaledBalanceOf(account), amount, "default multiplier: scaledBalanceOf == minted amount");
+        assertEq(asset().scaledBalanceOf(account), amount, "default multiplier: scaledBalanceOf == minted amount");
     }
 
     /// @notice Verifies scaledBalanceOf scales the held balance by the active multiplier
@@ -41,8 +41,8 @@ contract B20AssetScaledBalanceOfTest is B20AssetTest {
         _mint(account, amount);
         _updateMultiplier(newMultiplier);
         assertEq(
-            security().scaledBalanceOf(account),
-            (amount * newMultiplier) / security().WAD_PRECISION(),
+            asset().scaledBalanceOf(account),
+            (amount * newMultiplier) / asset().WAD_PRECISION(),
             "scaledBalanceOf must apply balance * multiplier / WAD"
         );
     }
@@ -59,7 +59,7 @@ contract B20AssetScaledBalanceOfTest is B20AssetTest {
         _updateMultiplier(5e18); // seed a non-zero value first
         _updateMultiplier(0); // then explicitly clear back to zero
         assertEq(
-            security().scaledBalanceOf(account), amount, "stored zero multiplier must produce identity (WAD fallback)"
+            asset().scaledBalanceOf(account), amount, "stored zero multiplier must produce identity (WAD fallback)"
         );
     }
 }

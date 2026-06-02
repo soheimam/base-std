@@ -27,8 +27,8 @@ contract B20FactoryGetTokenAddressTest is B20FactoryTest {
     /// @dev Variant byte at position [10] is part of the address derivation
     function test_getB20Address_success_differentVariantDiffers(address sender, bytes32 salt) public view {
         address asStablecoin = factory.getB20Address(IB20Factory.B20Variant.STABLECOIN, sender, salt);
-        address asSecurity = factory.getB20Address(IB20Factory.B20Variant.ASSET, sender, salt);
-        assertTrue(asStablecoin != asSecurity, "STABLECOIN vs ASSET must differ");
+        address asAsset = factory.getB20Address(IB20Factory.B20Variant.ASSET, sender, salt);
+        assertTrue(asStablecoin != asAsset, "STABLECOIN vs ASSET must differ");
     }
 
     /// @notice Verifies different senders produce different addresses for the same (variant, salt)

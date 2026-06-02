@@ -68,7 +68,7 @@ contract MockB20Asset is MockB20, IB20Asset {
     //                           DECIMALS
     // ============================================================
 
-    /// @notice Security-variant decimals are chosen at creation from
+    /// @notice Asset-variant decimals are chosen at creation from
     ///         `B20AssetCreateParams.decimals` (validated to
     ///         `[B20Constants.MIN_ASSET_DECIMALS, B20Constants.MAX_ASSET_DECIMALS]`
     ///         by the factory) and stored at

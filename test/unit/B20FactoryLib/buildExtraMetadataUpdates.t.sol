@@ -96,14 +96,10 @@ contract B20FactoryLibBuildExtraMetadataUpdatesTest is B20FactoryLibTest {
 
         assertEq(result.length, 3, "no entry may be elided");
         assertEq(
-            result[0],
-            abi.encodeCall(IB20Asset.updateExtraMetadata, (keys[0], values[0])),
-            "empty value passed through"
+            result[0], abi.encodeCall(IB20Asset.updateExtraMetadata, (keys[0], values[0])), "empty value passed through"
         );
         assertEq(
-            result[1],
-            abi.encodeCall(IB20Asset.updateExtraMetadata, (keys[1], values[1])),
-            "empty key passed through"
+            result[1], abi.encodeCall(IB20Asset.updateExtraMetadata, (keys[1], values[1])), "empty key passed through"
         );
         assertEq(
             result[2],

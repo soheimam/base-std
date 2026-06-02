@@ -22,18 +22,18 @@ contract B20AssetUpdateMultiplierRevertOrderTest is B20AssetTest {
         // Resolve the role constant before setting the prank; an external view
         // call inside abi.encodeWithSelector would otherwise consume vm.prank
         // before the state-changing call, sending it as address(this) instead.
-        bytes32 operatorRole = security().OPERATOR_ROLE();
+        bytes32 operatorRole = asset().OPERATOR_ROLE();
 
         // 1. ROLE fires.
         vm.prank(caller);
         vm.expectRevert(abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, operatorRole));
-        security().updateMultiplier(newMultiplier);
+        asset().updateMultiplier(newMultiplier);
 
         // Fix: grant OPERATOR_ROLE to caller.
         _grantRole(operatorRole, caller);
 
         // Success: all conditions resolved.
         vm.prank(caller);
-        security().updateMultiplier(newMultiplier);
+        asset().updateMultiplier(newMultiplier);
     }
 }

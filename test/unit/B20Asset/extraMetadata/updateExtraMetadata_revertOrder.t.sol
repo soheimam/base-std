@@ -30,7 +30,7 @@ contract B20AssetUpdateExtraMetadataRevertOrderTest is B20AssetTest {
         vm.expectRevert(
             abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, B20Constants.METADATA_ROLE)
         );
-        security().updateExtraMetadata("", value);
+        asset().updateExtraMetadata("", value);
 
         // Fix: grant METADATA_ROLE to caller.
         _grantRole(B20Constants.METADATA_ROLE, caller);
@@ -38,12 +38,12 @@ contract B20AssetUpdateExtraMetadataRevertOrderTest is B20AssetTest {
         // 2. INVALID-METADATA-KEY fires: caller now holds the role, but key is still empty.
         vm.prank(caller);
         vm.expectRevert(IB20Asset.InvalidMetadataKey.selector);
-        security().updateExtraMetadata("", value);
+        asset().updateExtraMetadata("", value);
 
         // Fix: pass a non-empty key.
 
         // Success: all conditions resolved.
         vm.prank(caller);
-        security().updateExtraMetadata(METADATA_EXAMPLE_1, value);
+        asset().updateExtraMetadata(METADATA_EXAMPLE_1, value);
     }
 }

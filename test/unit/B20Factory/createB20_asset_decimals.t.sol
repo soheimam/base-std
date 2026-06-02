@@ -29,7 +29,7 @@ contract B20FactoryCreateB20AssetDecimalsTest is B20FactoryTest {
     function test_createB20_revert_decimals_justBelowMin(address caller, bytes32 salt) public {
         _assumeValidCaller(caller);
         uint8 bad = B20Constants.MIN_ASSET_DECIMALS - 1;
-        IB20Factory.B20AssetCreateParams memory p = _securityParams("Security Test", "SEC", admin, bad);
+        IB20Factory.B20AssetCreateParams memory p = _assetParams("Asset Test", "AST", admin, bad);
         vm.prank(caller);
         vm.expectRevert(abi.encodeWithSelector(IB20Factory.InvalidDecimals.selector, bad));
         factory.createB20(IB20Factory.B20Variant.ASSET, salt, abi.encode(p), new bytes[](0));
@@ -39,7 +39,7 @@ contract B20FactoryCreateB20AssetDecimalsTest is B20FactoryTest {
     function test_createB20_revert_decimals_justAboveMax(address caller, bytes32 salt) public {
         _assumeValidCaller(caller);
         uint8 bad = B20Constants.MAX_ASSET_DECIMALS + 1;
-        IB20Factory.B20AssetCreateParams memory p = _securityParams("Security Test", "SEC", admin, bad);
+        IB20Factory.B20AssetCreateParams memory p = _assetParams("Asset Test", "AST", admin, bad);
         vm.prank(caller);
         vm.expectRevert(abi.encodeWithSelector(IB20Factory.InvalidDecimals.selector, bad));
         factory.createB20(IB20Factory.B20Variant.ASSET, salt, abi.encode(p), new bytes[](0));
@@ -50,7 +50,7 @@ contract B20FactoryCreateB20AssetDecimalsTest is B20FactoryTest {
     function test_createB20_revert_decimals_belowMin_fuzz(address caller, bytes32 salt, uint8 decimalsSeed) public {
         _assumeValidCaller(caller);
         uint8 bad = uint8(bound(uint256(decimalsSeed), 0, uint256(B20Constants.MIN_ASSET_DECIMALS) - 1));
-        IB20Factory.B20AssetCreateParams memory p = _securityParams("Security Test", "SEC", admin, bad);
+        IB20Factory.B20AssetCreateParams memory p = _assetParams("Asset Test", "AST", admin, bad);
         vm.prank(caller);
         vm.expectRevert(abi.encodeWithSelector(IB20Factory.InvalidDecimals.selector, bad));
         factory.createB20(IB20Factory.B20Variant.ASSET, salt, abi.encode(p), new bytes[](0));
@@ -62,7 +62,7 @@ contract B20FactoryCreateB20AssetDecimalsTest is B20FactoryTest {
         _assumeValidCaller(caller);
         uint8 bad =
             uint8(bound(uint256(decimalsSeed), uint256(B20Constants.MAX_ASSET_DECIMALS) + 1, uint256(type(uint8).max)));
-        IB20Factory.B20AssetCreateParams memory p = _securityParams("Security Test", "SEC", admin, bad);
+        IB20Factory.B20AssetCreateParams memory p = _assetParams("Asset Test", "AST", admin, bad);
         vm.prank(caller);
         vm.expectRevert(abi.encodeWithSelector(IB20Factory.InvalidDecimals.selector, bad));
         factory.createB20(IB20Factory.B20Variant.ASSET, salt, abi.encode(p), new bytes[](0));
@@ -77,8 +77,8 @@ contract B20FactoryCreateB20AssetDecimalsTest is B20FactoryTest {
     function test_createB20_success_decimals_lowerBound(address caller, bytes32 salt) public {
         _assumeValidCaller(caller);
         IB20Factory.B20AssetCreateParams memory p =
-            _securityParams("Security Test", "SEC", admin, B20Constants.MIN_ASSET_DECIMALS);
-        address token = _createSecurity(caller, salt, p, new bytes[](0));
+            _assetParams("Asset Test", "AST", admin, B20Constants.MIN_ASSET_DECIMALS);
+        address token = _createAsset(caller, salt, p, new bytes[](0));
         assertEq(
             MockB20(token).decimals(), B20Constants.MIN_ASSET_DECIMALS, "decimals() must equal MIN_ASSET_DECIMALS (6)"
         );
@@ -89,8 +89,8 @@ contract B20FactoryCreateB20AssetDecimalsTest is B20FactoryTest {
     function test_createB20_success_decimals_upperBound(address caller, bytes32 salt) public {
         _assumeValidCaller(caller);
         IB20Factory.B20AssetCreateParams memory p =
-            _securityParams("Security Test", "SEC", admin, B20Constants.MAX_ASSET_DECIMALS);
-        address token = _createSecurity(caller, salt, p, new bytes[](0));
+            _assetParams("Asset Test", "AST", admin, B20Constants.MAX_ASSET_DECIMALS);
+        address token = _createAsset(caller, salt, p, new bytes[](0));
         assertEq(
             MockB20(token).decimals(), B20Constants.MAX_ASSET_DECIMALS, "decimals() must equal MAX_ASSET_DECIMALS (18)"
         );
@@ -111,8 +111,8 @@ contract B20FactoryCreateB20AssetDecimalsTest is B20FactoryTest {
                 uint256(B20Constants.MAX_ASSET_DECIMALS)
             )
         );
-        IB20Factory.B20AssetCreateParams memory p = _securityParams("Security Test", "SEC", admin, good);
-        address token = _createSecurity(caller, salt, p, new bytes[](0));
+        IB20Factory.B20AssetCreateParams memory p = _assetParams("Asset Test", "AST", admin, good);
+        address token = _createAsset(caller, salt, p, new bytes[](0));
         assertEq(MockB20(token).decimals(), good, "decimals() must round-trip the in-range fuzzed input");
     }
 
@@ -134,8 +134,8 @@ contract B20FactoryCreateB20AssetDecimalsTest is B20FactoryTest {
                 uint256(B20Constants.MAX_ASSET_DECIMALS)
             )
         );
-        IB20Factory.B20AssetCreateParams memory p = _securityParams("Security Test", "SEC", admin, good);
-        address token = _createSecurity(caller, salt, p, new bytes[](0));
+        IB20Factory.B20AssetCreateParams memory p = _assetParams("Asset Test", "AST", admin, good);
+        address token = _createAsset(caller, salt, p, new bytes[](0));
 
         assertEq(
             uint256(vm.load(token, MockB20AssetStorage.decimalsSlot())),
@@ -152,7 +152,7 @@ contract B20FactoryCreateB20AssetDecimalsTest is B20FactoryTest {
     /// @notice Verifies the `B20Created` event's `decimals` field equals the input value
     ///         on every in-range fuzz input.
     /// @dev    `expectEmit`-level pin with a fuzzed value.
-    function test_createB20_success_emitsB20Created_security_decimals(address caller, bytes32 salt, uint8 decimalsSeed)
+    function test_createB20_success_emitsB20Created_asset_decimals(address caller, bytes32 salt, uint8 decimalsSeed)
         public
     {
         _assumeValidCaller(caller);
@@ -163,12 +163,12 @@ contract B20FactoryCreateB20AssetDecimalsTest is B20FactoryTest {
                 uint256(B20Constants.MAX_ASSET_DECIMALS)
             )
         );
-        IB20Factory.B20AssetCreateParams memory p = _securityParams("Security Test", "SEC", admin, good);
+        IB20Factory.B20AssetCreateParams memory p = _assetParams("Asset Test", "AST", admin, good);
         address predicted = factory.getB20Address(IB20Factory.B20Variant.ASSET, caller, salt);
 
         vm.expectEmit(true, true, false, true, address(factory));
-        emit IB20Factory.B20Created(predicted, IB20Factory.B20Variant.ASSET, "Security Test", "SEC", good, bytes(""));
-        _createSecurity(caller, salt, p, new bytes[](0));
+        emit IB20Factory.B20Created(predicted, IB20Factory.B20Variant.ASSET, "Asset Test", "AST", good, bytes(""));
+        _createAsset(caller, salt, p, new bytes[](0));
     }
 
     /// @notice Decodes the `B20Created` event from the recorded logs and asserts its
@@ -186,10 +186,10 @@ contract B20FactoryCreateB20AssetDecimalsTest is B20FactoryTest {
                 uint256(B20Constants.MAX_ASSET_DECIMALS)
             )
         );
-        IB20Factory.B20AssetCreateParams memory p = _securityParams("Security Test", "SEC", admin, good);
+        IB20Factory.B20AssetCreateParams memory p = _assetParams("Asset Test", "AST", admin, good);
 
         vm.recordLogs();
-        address token = _createSecurity(caller, salt, p, new bytes[](0));
+        address token = _createAsset(caller, salt, p, new bytes[](0));
         Vm.Log[] memory logs = vm.getRecordedLogs();
 
         bytes32 selector = IB20Factory.B20Created.selector;
@@ -213,7 +213,7 @@ contract B20FactoryCreateB20AssetDecimalsTest is B20FactoryTest {
     //////////////////////////////////////////////////////////////*/
 
     /// @notice Verifies the stablecoin variant still hardcodes `decimals() == 6`.
-    ///         BOP-255 is a security-only change; the stablecoin path must be untouched.
+    ///         BOP-255 is an asset-only change; the stablecoin path must be untouched.
     function test_createB20_success_stablecoin_decimalsStillHardcoded(address caller, bytes32 salt) public {
         _assumeValidCaller(caller);
         address token = _createStablecoin(caller, salt, _stablecoinParams(), new bytes[](0));

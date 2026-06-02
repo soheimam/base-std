@@ -6,8 +6,8 @@ import {IB20} from "./IB20.sol";
 /// @title  IB20Asset
 /// @author Coinbase
 ///
-/// @notice A B-20 token variant for tokenized assets. Extends `IB20` with announcements,
-///         multiplier-based scaling, batched mint for corporate actions, and extra-metadata
+/// @notice A B-20 token variant for assets of all kinds. Extends `IB20` with announcements,
+///         multiplier-based scaling, batched mint for bulk issuance, and extra-metadata
 ///         entries.
 interface IB20Asset is IB20 {
     /*//////////////////////////////////////////////////////////////

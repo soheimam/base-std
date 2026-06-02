@@ -3,8 +3,8 @@ pragma solidity ^0.8.20;
 
 import {B20Constants} from "./B20Constants.sol";
 import {IB20} from "../interfaces/IB20.sol";
-import {IB20Factory} from "../interfaces/IB20Factory.sol";
 import {IB20Asset} from "../interfaces/IB20Asset.sol";
+import {IB20Factory} from "../interfaces/IB20Factory.sol";
 
 /// @title  B20FactoryLib
 /// @author Coinbase
@@ -239,9 +239,9 @@ library B20FactoryLib {
         return buildRoleGrants(roles, accounts);
     }
 
-    /// @notice Same as `buildRoleGrants(B20RoleHolders)`, but for the security role set.
+    /// @notice Same as `buildRoleGrants(B20RoleHolders)`, but for the asset role set.
     ///
-    /// @param holders Security role-holder bundle.
+    /// @param holders Asset role-holder bundle.
     /// @return initCalls ABI-encoded `grantRole` initCalls.
     function buildRoleGrants(B20AssetRoleHolders memory holders) internal pure returns (bytes[] memory initCalls) {
         bytes32[] memory roles = new bytes32[](7);

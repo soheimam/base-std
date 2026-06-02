@@ -9,16 +9,16 @@ import {IB20Asset} from "src/interfaces/IB20Asset.sol";
 ///
 /// Extends `B20Test` for the inherited test surface (actors, labels,
 /// setUp wiring, the `_singleFeature` helper, the `_grantRole` /
-/// `_mint` / `_pause` action wrappers, and the security-variant token
+/// `_mint` / `_pause` action wrappers, and the asset-variant token
 /// deployed by `_deployToken`). Adds the variant-specific role holder
 /// (`operator`) plus helpers for the announcement, multiplier,
 /// and extra-metadata surfaces.
 ///
 /// The inherited `token` member is typed `IB20`. Tests that need the
 /// variant-only surface (`announce`, `batchMint`, etc.) cast inline via
-/// the `security` view-helper.
+/// the `asset` view-helper.
 contract B20AssetTest is B20Test {
-    // -- Security-variant role-holder actors --
+    // -- Asset-variant role-holder actors --
     address internal operator = makeAddr("operator");
 
     // ============================================================
@@ -54,7 +54,7 @@ contract B20AssetTest is B20Test {
 
     /// @notice Returns `token` cast to `IB20Asset`. Saves typing
     ///         `IB20Asset(address(token))` at every callsite.
-    function security() internal view returns (IB20Asset) {
+    function asset() internal view returns (IB20Asset) {
         return IB20Asset(address(token));
     }
 
@@ -65,7 +65,7 @@ contract B20AssetTest is B20Test {
     /// @notice Grants `OPERATOR_ROLE` to the `operator` actor as
     ///         the admin, idempotent.
     function _grantOperator() internal {
-        bytes32 role = security().OPERATOR_ROLE();
+        bytes32 role = asset().OPERATOR_ROLE();
         if (!token.hasRole(role, operator)) _grantRole(role, operator);
     }
 
@@ -78,7 +78,7 @@ contract B20AssetTest is B20Test {
     function _updateMultiplier(uint256 newMultiplier) internal {
         _grantOperator();
         vm.prank(operator);
-        security().updateMultiplier(newMultiplier);
+        asset().updateMultiplier(newMultiplier);
     }
 
     // ============================================================
@@ -95,7 +95,7 @@ contract B20AssetTest is B20Test {
         string memory uri
     ) internal {
         vm.prank(caller);
-        security().announce(internalCalls, id, description, uri);
+        asset().announce(internalCalls, id, description, uri);
     }
 
     /// @notice Calls `announce` with defaults: `operator` caller, empty
@@ -135,7 +135,7 @@ contract B20AssetTest is B20Test {
     // Compile-time copies of the contract's variant-only constants.
     // Tests reference these when they need the value in a context that
     // can't make a contract call (e.g. inside a struct literal). The
-    // values match `security().OPERATOR_ROLE()` etc. by construction;
+    // values match `asset().OPERATOR_ROLE()` etc. by construction;
     // the per-constant test in `test/unit/B20Asset/constants/` pins
     // that down.
 

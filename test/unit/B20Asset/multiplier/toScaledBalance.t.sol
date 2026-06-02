@@ -7,8 +7,8 @@ contract B20AssetToScaledBalanceTest is B20AssetTest {
     /// @notice Verifies toScaledBalance is the identity on a fresh token (WAD multiplier)
     /// @dev Default multiplier is WAD, so rawBalance * WAD / WAD == rawBalance for every input.
     function test_toScaledBalance_success_identityOnWadDefault(uint256 rawBalance) public view {
-        rawBalance = bound(rawBalance, 0, type(uint256).max / security().WAD_PRECISION());
-        assertEq(security().toScaledBalance(rawBalance), rawBalance, "default multiplier must produce identity");
+        rawBalance = bound(rawBalance, 0, type(uint256).max / asset().WAD_PRECISION());
+        assertEq(asset().toScaledBalance(rawBalance), rawBalance, "default multiplier must produce identity");
     }
 
     /// @notice Verifies toScaledBalance scales by the stored multiplier after an update
@@ -19,8 +19,8 @@ contract B20AssetToScaledBalanceTest is B20AssetTest {
         newMultiplier = bound(newMultiplier, 1, type(uint128).max);
         _updateMultiplier(newMultiplier);
         assertEq(
-            security().toScaledBalance(rawBalance),
-            (rawBalance * newMultiplier) / security().WAD_PRECISION(),
+            asset().toScaledBalance(rawBalance),
+            (rawBalance * newMultiplier) / asset().WAD_PRECISION(),
             "toScaledBalance must apply rawBalance * multiplier / WAD"
         );
     }
@@ -30,7 +30,7 @@ contract B20AssetToScaledBalanceTest is B20AssetTest {
     function test_toScaledBalance_success_zeroRawBalance(uint256 newMultiplier) public {
         newMultiplier = bound(newMultiplier, 1, type(uint256).max);
         _updateMultiplier(newMultiplier);
-        assertEq(security().toScaledBalance(0), 0, "zero rawBalance must produce zero scaled balance");
+        assertEq(asset().toScaledBalance(0), 0, "zero rawBalance must produce zero scaled balance");
     }
 
     /// @notice Verifies toScaledBalance applies the WAD fallback when the stored multiplier is explicitly zero
@@ -44,7 +44,7 @@ contract B20AssetToScaledBalanceTest is B20AssetTest {
         _updateMultiplier(5e18); // seed a non-zero value first
         _updateMultiplier(0); // then explicitly clear back to zero
         assertEq(
-            security().toScaledBalance(rawBalance),
+            asset().toScaledBalance(rawBalance),
             rawBalance,
             "stored zero multiplier must produce identity (WAD fallback)"
         );

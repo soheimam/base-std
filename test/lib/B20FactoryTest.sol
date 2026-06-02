@@ -49,7 +49,7 @@ contract B20FactoryTest is BaseTest {
     ///         no-arg overload (which pins `decimals = MIN_ASSET_DECIMALS`
     ///         to match historical behavior). Tests that DO care thread the
     ///         explicit value through here.
-    function _securityParams(string memory name_, string memory symbol_, address initialAdmin_, uint8 decimals_)
+    function _assetParams(string memory name_, string memory symbol_, address initialAdmin_, uint8 decimals_)
         internal
         pure
         returns (IB20Factory.B20AssetCreateParams memory)
@@ -64,17 +64,17 @@ contract B20FactoryTest is BaseTest {
     }
 
     /// @notice Build a `B20AssetCreateParams` with the default decimals (`MIN_ASSET_DECIMALS`).
-    function _securityParams(string memory name_, string memory symbol_, address initialAdmin_)
+    function _assetParams(string memory name_, string memory symbol_, address initialAdmin_)
         internal
         pure
         returns (IB20Factory.B20AssetCreateParams memory)
     {
-        return _securityParams(name_, symbol_, initialAdmin_, B20Constants.MIN_ASSET_DECIMALS);
+        return _assetParams(name_, symbol_, initialAdmin_, B20Constants.MIN_ASSET_DECIMALS);
     }
 
-    /// @notice Build a default `B20AssetCreateParams` (`Security Test`/`SEC`, admin, `MIN_ASSET_DECIMALS`).
-    function _securityParams() internal view returns (IB20Factory.B20AssetCreateParams memory) {
-        return _securityParams("Security Test", "SEC", admin);
+    /// @notice Build a default `B20AssetCreateParams` (`Asset Test`/`SEC`, admin, `MIN_ASSET_DECIMALS`).
+    function _assetParams() internal view returns (IB20Factory.B20AssetCreateParams memory) {
+        return _assetParams("Asset Test", "AST", admin);
     }
 
     // -- Action wrappers --
@@ -95,8 +95,8 @@ contract B20FactoryTest is BaseTest {
         return _createStablecoin(alice, keccak256("stablecoin-salt"), _stablecoinParams(), new bytes[](0));
     }
 
-    /// @notice Create a security-variant token with explicit caller, salt, params, and init calls.
-    function _createSecurity(
+    /// @notice Create a asset-variant token with explicit caller, salt, params, and init calls.
+    function _createAsset(
         address caller,
         bytes32 salt,
         IB20Factory.B20AssetCreateParams memory params,
@@ -106,9 +106,9 @@ contract B20FactoryTest is BaseTest {
         return factory.createB20(IB20Factory.B20Variant.ASSET, salt, abi.encode(params), initCalls);
     }
 
-    /// @notice Create a security-variant token with defaults.
-    function _createSecurity() internal returns (address token) {
-        return _createSecurity(alice, keccak256("security-salt"), _securityParams(), new bytes[](0));
+    /// @notice Create a asset-variant token with defaults.
+    function _createAsset() internal returns (address token) {
+        return _createAsset(alice, keccak256("asset-salt"), _assetParams(), new bytes[](0));
     }
 
     // ============================================================

@@ -168,7 +168,7 @@ contract MockB20Factory is IB20Factory {
         //       from the token.
         _writeBaseStorage(token, name_, symbol_);
         if (variant == B20Variant.ASSET) {
-            _writeSecurityStorage(token, decimals);
+            _writeAssetStorage(token, decimals);
         } else if (variant == B20Variant.STABLECOIN) {
             _writeStablecoinStorage(token, currency_);
         }
@@ -321,7 +321,7 @@ contract MockB20Factory is IB20Factory {
     ///      is just `decimals`; `multiplier` defaults to zero
     ///      (interpreted by the read surface as WAD), and announcement /
     ///      identifier maps are empty by default.
-    function _writeSecurityStorage(address token, uint8 decimals) internal {
+    function _writeAssetStorage(address token, uint8 decimals) internal {
         // `decimals` is a `uint8` packed in the low byte of its own slot.
         // Writing the whole slot is safe because the slot is otherwise
         // unused today (future small variant-immutable fields packed into

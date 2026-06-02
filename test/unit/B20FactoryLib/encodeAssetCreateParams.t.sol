@@ -10,7 +10,7 @@ contract B20FactoryLibEncodeAssetCreateParamsTest is B20FactoryLibTest {
     /// @notice Verifies the output decodes back to a `B20AssetCreateParams`
     ///         with the caller's fields and the current version byte.
     /// @dev    Round-trips through `abi.decode` to pin the wire format the
-    ///         factory's security decode arm consumes.
+    ///         factory's asset decode arm consumes.
     function test_encodeAssetCreateParams_success_roundTripsThroughDecode(
         string memory name,
         string memory symbol,
@@ -21,9 +21,7 @@ contract B20FactoryLibEncodeAssetCreateParamsTest is B20FactoryLibTest {
         IB20Factory.B20AssetCreateParams memory decoded = abi.decode(blob, (IB20Factory.B20AssetCreateParams));
 
         assertEq(
-            decoded.version,
-            B20FactoryLib.B20_ASSET_CREATE_PARAMS_VERSION,
-            "version byte must match library constant"
+            decoded.version, B20FactoryLib.B20_ASSET_CREATE_PARAMS_VERSION, "version byte must match library constant"
         );
         assertEq(decoded.name, name, "name must round-trip");
         assertEq(decoded.symbol, symbol, "symbol must round-trip");
@@ -54,7 +52,7 @@ contract B20FactoryLibEncodeAssetCreateParamsTest is B20FactoryLibTest {
         assertEq(actual, expected, "encoded blob must match hand-encoded struct byte-for-byte");
     }
 
-    /// @notice Verifies the library's current security create-params version is `1`.
+    /// @notice Verifies the library's current asset create-params version is `1`.
     /// @dev    Pins the constant so a future bump is intentional and visible in diff.
     function test_b20AssetCreateParamsVersion_pinned() public pure {
         assertEq(uint256(B20FactoryLib.B20_ASSET_CREATE_PARAMS_VERSION), 1, "version must be 1");

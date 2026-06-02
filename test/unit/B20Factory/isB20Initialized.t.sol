@@ -40,7 +40,7 @@ contract B20FactoryIsB20InitializedTest is B20FactoryTest {
 
     /// @notice Verifies isB20Initialized returns true for a freshly-created ASSET-variant token
     function test_isB20Initialized_success_trueForAssetToken(bytes32 salt) public {
-        address token = _createSecurity(alice, salt, _securityParams(), new bytes[](0));
+        address token = _createAsset(alice, salt, _assetParams(), new bytes[](0));
         assertTrue(factory.isB20Initialized(token), "ASSET token must be recognized as initialized");
     }
 }

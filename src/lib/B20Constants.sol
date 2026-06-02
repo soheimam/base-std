@@ -23,7 +23,7 @@ library B20Constants {
 
     /// @notice Inclusive lower bound for `B20AssetCreateParams.decimals`. `6` is the
     ///         floor most stablecoin-grade integrations expect; values below it lose
-    ///         meaningful unit precision for tokenized-security workflows.
+    ///         meaningful unit precision for asset workflows.
     uint8 internal constant MIN_ASSET_DECIMALS = 6;
 
     /// @notice Inclusive upper bound for `B20AssetCreateParams.decimals`. `18` is the

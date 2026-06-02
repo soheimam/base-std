@@ -35,7 +35,7 @@ pragma solidity ^0.8.20;
 ///         Identity state (`name`, `symbol`) is kept in this struct rather
 ///         than encoded into the address because mutability is required
 ///         (`updateName` / `updateSymbol` on the IB20 surface). `decimals` is
-///         variant-fixed (`18` for default, `6` for stablecoin/security)
+///         variant-fixed (`18` for default, `6` for stablecoin/asset)
 ///         and read from code, not storage.
 library MockB20Storage {
     // ============================================================
@@ -386,7 +386,7 @@ library MockB20AssetStorage {
 
     // keccak256(abi.encode(uint256(keccak256("base.b20.asset")) - 1)) & ~bytes32(uint256(0xff))
     // Verified against the computation in derivedLocation() below.
-    bytes32 internal constant STORAGE_LOCATION = 0x4a21e1b7f963e21baf0daffe6bab858a1e5fecef1144f3aca3c0c4534c7ac600;
+    bytes32 internal constant STORAGE_LOCATION = 0xfdc6d4552d1286ade4d9facdbf0fb50d2ec9b89a90e104f26fd277585e374b00;
 
     // ============================================================
     //                     SLOT OFFSETS WITHIN LAYOUT

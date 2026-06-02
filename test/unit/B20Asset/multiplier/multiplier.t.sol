@@ -10,7 +10,7 @@ contract B20AssetMultiplierTest is B20AssetTest {
     /// @dev Freshly-etched token has stored multiplier = 0; the read surface fallback returns
     ///      WAD_PRECISION so the token reports a 1:1 multiplier without a factory write.
     function test_multiplier_success_defaultIsWad() public view {
-        assertEq(security().multiplier(), security().WAD_PRECISION(), "default multiplier must equal WAD");
+        assertEq(asset().multiplier(), asset().WAD_PRECISION(), "default multiplier must equal WAD");
         // Paired slot assertion: the storage slot is genuinely zero on a fresh token.
         assertEq(
             uint256(vm.load(address(token), MockB20AssetStorage.multiplierSlot())),
@@ -25,7 +25,7 @@ contract B20AssetMultiplierTest is B20AssetTest {
     function test_multiplier_success_returnsStoredValue(uint256 newMultiplier) public {
         newMultiplier = bound(newMultiplier, 1, type(uint256).max);
         _updateMultiplier(newMultiplier);
-        assertEq(security().multiplier(), newMultiplier, "multiplier must equal the last written value");
+        assertEq(asset().multiplier(), newMultiplier, "multiplier must equal the last written value");
         assertEq(
             uint256(vm.load(address(token), MockB20AssetStorage.multiplierSlot())),
             newMultiplier,
@@ -39,6 +39,6 @@ contract B20AssetMultiplierTest is B20AssetTest {
     function test_multiplier_success_zeroRestoresWadFallback() public {
         _updateMultiplier(5e18);
         _updateMultiplier(0);
-        assertEq(security().multiplier(), security().WAD_PRECISION(), "multiplier must collapse to WAD after zero");
+        assertEq(asset().multiplier(), asset().WAD_PRECISION(), "multiplier must collapse to WAD after zero");
     }
 }

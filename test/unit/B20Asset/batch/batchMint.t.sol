@@ -25,7 +25,7 @@ contract B20AssetBatchMintTest is B20AssetTest {
 
         vm.prank(minter);
         vm.expectRevert(abi.encodeWithSelector(IB20Asset.LengthMismatch.selector, uint256(1), uint256(2)));
-        security().batchMint(recipients, amounts);
+        asset().batchMint(recipients, amounts);
     }
 
     /// @notice Verifies batchMint reverts when both arrays are empty
@@ -36,7 +36,7 @@ contract B20AssetBatchMintTest is B20AssetTest {
 
         vm.prank(minter);
         vm.expectRevert(IB20Asset.EmptyBatch.selector);
-        security().batchMint(new address[](0), new uint256[](0));
+        asset().batchMint(new address[](0), new uint256[](0));
     }
 
     /// @notice Verifies batchMint reverts when caller lacks MINT_ROLE
@@ -57,7 +57,7 @@ contract B20AssetBatchMintTest is B20AssetTest {
         vm.expectRevert(
             abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, B20Constants.MINT_ROLE)
         );
-        security().batchMint(recipients, amounts);
+        asset().batchMint(recipients, amounts);
     }
 
     /// @notice Verifies batchMint surfaces _mint's pause revert when MINT is paused
@@ -69,7 +69,7 @@ contract B20AssetBatchMintTest is B20AssetTest {
 
         vm.prank(minter);
         vm.expectRevert(abi.encodeWithSelector(IB20.ContractPaused.selector, IB20.PausableFeature.MINT));
-        security().batchMint(_singletonAddresses(to), _singletonUints(amount));
+        asset().batchMint(_singletonAddresses(to), _singletonUints(amount));
     }
 
     /// @notice Verifies batchMint surfaces _mint's policy revert when MINT_RECEIVER_POLICY forbids
@@ -86,7 +86,7 @@ contract B20AssetBatchMintTest is B20AssetTest {
                 IB20.PolicyForbids.selector, B20Constants.MINT_RECEIVER_POLICY, PolicyRegistryConstants.ALWAYS_BLOCK_ID
             )
         );
-        security().batchMint(_singletonAddresses(to), _singletonUints(amount));
+        asset().batchMint(_singletonAddresses(to), _singletonUints(amount));
     }
 
     /// @notice Verifies batchMint surfaces _mint's supply-cap revert when accumulated mints exceed cap
@@ -111,7 +111,7 @@ contract B20AssetBatchMintTest is B20AssetTest {
 
         vm.prank(minter);
         vm.expectRevert(abi.encodeWithSelector(IB20.SupplyCapExceeded.selector, uint256(100), uint256(120)));
-        security().batchMint(recipients, amounts);
+        asset().batchMint(recipients, amounts);
     }
 
     /// @notice Verifies batchMint succeeds with a single recipient and credits the balance
@@ -125,7 +125,7 @@ contract B20AssetBatchMintTest is B20AssetTest {
         uint256 balanceBefore = token.balanceOf(to);
 
         vm.prank(minter);
-        security().batchMint(_singletonAddresses(to), _singletonUints(amount));
+        asset().batchMint(_singletonAddresses(to), _singletonUints(amount));
 
         assertEq(token.balanceOf(to), balanceBefore + amount, "balance must increase by amount");
         assertEq(token.totalSupply(), supplyBefore + amount, "totalSupply must increase by amount");
@@ -149,7 +149,7 @@ contract B20AssetBatchMintTest is B20AssetTest {
         uint256 supplyBefore = token.totalSupply();
 
         vm.prank(minter);
-        security().batchMint(recipients, amounts);
+        asset().batchMint(recipients, amounts);
 
         assertEq(token.balanceOf(recipients[0]), amounts[0], "recipient[0] balance must equal amounts[0]");
         assertEq(token.balanceOf(recipients[1]), amounts[1], "recipient[1] balance must equal amounts[1]");
@@ -178,6 +178,6 @@ contract B20AssetBatchMintTest is B20AssetTest {
         vm.expectEmit(true, true, false, true, address(token));
         emit IB20.Transfer(address(0), bob, 200);
         vm.prank(minter);
-        security().batchMint(recipients, amounts);
+        asset().batchMint(recipients, amounts);
     }
 }

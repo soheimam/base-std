@@ -8,7 +8,7 @@ import {MockB20AssetStorage} from "test/lib/mocks/MockB20Storage.sol";
 
 /// @notice Exhaustive layout spec for the `base.b20.asset` namespace.
 ///
-/// @dev    Mirrors `B20FullLayout.t.sol`'s pattern for the security
+/// @dev    Mirrors `B20FullLayout.t.sol`'s pattern for the asset
 ///         variant's added namespace. Populates non-default values in
 ///         every field via the public `IB20Asset` surface, then asserts
 ///         the raw slot bytes at each absolute slot via `vm.load`.
@@ -27,7 +27,7 @@ contract B20AssetFullLayoutTest is B20AssetTest {
     string internal constant REFERENCE_VALUE = "REF-2024-001";
     string internal constant ANNOUNCEMENT_ID = "layout-pin-announcement";
 
-    /// @notice Cross-cuts every field of the security-variant namespace in
+    /// @notice Cross-cuts every field of the asset-variant namespace in
     ///         one populated snapshot.
     /// @dev    Field coverage for `base.b20.asset` (slots 0..3):
     ///         - 0: decimals (factory-written at creation)
@@ -35,26 +35,26 @@ contract B20AssetFullLayoutTest is B20AssetTest {
     ///         - 2: usedAnnouncementIds[id]
     ///         - 3: extraMetadata[key]  (one example key mutated; the other
     ///              left empty to confirm the factory seeds no entries)
-    function test_b20SecurityLayout_success_populatedSnapshotMatchesAllSlots() public {
+    function test_b20AssetLayout_success_populatedSnapshotMatchesAllSlots() public {
         // ---------- Populate ----------
         _populate();
 
         address tokenAddr = address(token);
 
         // ---------- decimals (slot 0) ----------
-        // The default `_securityParams()` helper passes MIN_ASSET_DECIMALS (6),
+        // The default `_assetParams()` helper passes MIN_ASSET_DECIMALS (6),
         // and the factory writes that as a one-word `uint256` (low byte).
         assertEq(
             uint256(vm.load(tokenAddr, MockB20AssetStorage.decimalsSlot())),
             uint256(B20Constants.MIN_ASSET_DECIMALS),
-            "security slot 0: decimals must hold the factory-written value"
+            "asset slot 0: decimals must hold the factory-written value"
         );
 
         // ---------- multiplier (slot 1) ----------
         assertEq(
             uint256(vm.load(tokenAddr, MockB20AssetStorage.multiplierSlot())),
             MULTIPLIER_MARKER,
-            "security slot 1: multiplier must hold the written value"
+            "asset slot 1: multiplier must hold the written value"
         );
 
         // ---------- usedAnnouncementIds[id] (slot 2, hashed by id) ----------
@@ -63,7 +63,7 @@ contract B20AssetFullLayoutTest is B20AssetTest {
         assertEq(
             uint256(vm.load(tokenAddr, MockB20AssetStorage.usedAnnouncementIdSlot(ANNOUNCEMENT_ID))),
             uint256(1),
-            "security slot 2: usedAnnouncementIds[id] must be true after announce"
+            "asset slot 2: usedAnnouncementIds[id] must be true after announce"
         );
 
         // ---------- extraMetadata[key] (slot 3, hashed by key) ----------
@@ -73,12 +73,12 @@ contract B20AssetFullLayoutTest is B20AssetTest {
         assertEq(
             vm.load(tokenAddr, MockB20AssetStorage.extraMetadataSlot(METADATA_EXAMPLE_1)),
             bytes32(0),
-            "security slot 3: extraMetadata[example_1] must remain zero (factory seeds no entries)"
+            "asset slot 3: extraMetadata[example_1] must remain zero (factory seeds no entries)"
         );
         assertEq(
             vm.load(tokenAddr, MockB20AssetStorage.extraMetadataSlot(METADATA_EXAMPLE_3)),
             _expectedStringFieldSlot(REFERENCE_VALUE),
-            "security slot 3: extraMetadata[example_3] must hold the post-creation short-string encoding"
+            "asset slot 3: extraMetadata[example_3] must hold the post-creation short-string encoding"
         );
     }
 
@@ -94,7 +94,7 @@ contract B20AssetFullLayoutTest is B20AssetTest {
         // defaults to empty.
         _grantRole(B20Constants.METADATA_ROLE, admin);
         vm.prank(admin);
-        security().updateExtraMetadata(METADATA_EXAMPLE_3, REFERENCE_VALUE);
+        asset().updateExtraMetadata(METADATA_EXAMPLE_3, REFERENCE_VALUE);
         // usedAnnouncementIds[ANNOUNCEMENT_ID]: flip via announce.
         _announce(ANNOUNCEMENT_ID);
     }

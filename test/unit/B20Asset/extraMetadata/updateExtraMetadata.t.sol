@@ -21,7 +21,7 @@ contract B20AssetUpdateExtraMetadataTest is B20AssetTest {
         vm.expectRevert(
             abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, B20Constants.METADATA_ROLE)
         );
-        security().updateExtraMetadata(METADATA_EXAMPLE_1, value);
+        asset().updateExtraMetadata(METADATA_EXAMPLE_1, value);
     }
 
     /// @notice Verifies updateExtraMetadata reverts when key is empty
@@ -31,7 +31,7 @@ contract B20AssetUpdateExtraMetadataTest is B20AssetTest {
         _grantRole(B20Constants.METADATA_ROLE, admin);
         vm.prank(admin);
         vm.expectRevert(IB20Asset.InvalidMetadataKey.selector);
-        security().updateExtraMetadata("", value);
+        asset().updateExtraMetadata("", value);
     }
 
     /// @notice Verifies updateExtraMetadata writes the value through the getter
@@ -40,8 +40,8 @@ contract B20AssetUpdateExtraMetadataTest is B20AssetTest {
         vm.assume(bytes(value).length > 0);
         _grantRole(B20Constants.METADATA_ROLE, admin);
         vm.prank(admin);
-        security().updateExtraMetadata(METADATA_EXAMPLE_1, value);
-        assertEq(security().extraMetadata(METADATA_EXAMPLE_1), value, "getter must reflect the write");
+        asset().updateExtraMetadata(METADATA_EXAMPLE_1, value);
+        assertEq(asset().extraMetadata(METADATA_EXAMPLE_1), value, "getter must reflect the write");
     }
 
     /// @notice Verifies an empty value removes the entry (subsequent read returns empty string)
@@ -50,12 +50,12 @@ contract B20AssetUpdateExtraMetadataTest is B20AssetTest {
         vm.assume(bytes(value).length > 0);
         _grantRole(B20Constants.METADATA_ROLE, admin);
         vm.prank(admin);
-        security().updateExtraMetadata(METADATA_EXAMPLE_1, value);
-        assertEq(security().extraMetadata(METADATA_EXAMPLE_1), value, "test setup: entry must be set");
+        asset().updateExtraMetadata(METADATA_EXAMPLE_1, value);
+        assertEq(asset().extraMetadata(METADATA_EXAMPLE_1), value, "test setup: entry must be set");
 
         vm.prank(admin);
-        security().updateExtraMetadata(METADATA_EXAMPLE_1, "");
-        assertEq(security().extraMetadata(METADATA_EXAMPLE_1), "", "empty value must remove the entry");
+        asset().updateExtraMetadata(METADATA_EXAMPLE_1, "");
+        assertEq(asset().extraMetadata(METADATA_EXAMPLE_1), "", "empty value must remove the entry");
     }
 
     /// @notice Verifies a subsequent write overwrites the previous value
@@ -67,10 +67,10 @@ contract B20AssetUpdateExtraMetadataTest is B20AssetTest {
 
         _grantRole(B20Constants.METADATA_ROLE, admin);
         vm.prank(admin);
-        security().updateExtraMetadata(METADATA_EXAMPLE_1, first);
+        asset().updateExtraMetadata(METADATA_EXAMPLE_1, first);
         vm.prank(admin);
-        security().updateExtraMetadata(METADATA_EXAMPLE_1, second);
-        assertEq(security().extraMetadata(METADATA_EXAMPLE_1), second, "overwrite must replace prior value");
+        asset().updateExtraMetadata(METADATA_EXAMPLE_1, second);
+        assertEq(asset().extraMetadata(METADATA_EXAMPLE_1), second, "overwrite must replace prior value");
     }
 
     /// @notice Verifies updateExtraMetadata emits ExtraMetadataUpdated(key, value)
@@ -82,6 +82,6 @@ contract B20AssetUpdateExtraMetadataTest is B20AssetTest {
         vm.expectEmit(false, false, false, true, address(token));
         emit IB20Asset.ExtraMetadataUpdated(METADATA_EXAMPLE_1, value);
         vm.prank(admin);
-        security().updateExtraMetadata(METADATA_EXAMPLE_1, value);
+        asset().updateExtraMetadata(METADATA_EXAMPLE_1, value);
     }
 }

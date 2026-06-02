@@ -13,7 +13,7 @@ interface IB20Factory {
 
     /// @notice Variant of a B-20 token. Encoded in address byte `[10]`.
     ///
-    /// @param ASSET   Security variant (configurable `decimals`, multiplier, announcements, batched issuance / clawback).
+    /// @param ASSET      Asset variant (configurable `decimals`, multiplier, announcements, batched issuance / clawback).
     /// @param STABLECOIN Stablecoin variant (fixed `6` decimals, immutable `currency`).
     enum B20Variant {
         ASSET,
@@ -34,7 +34,7 @@ interface IB20Factory {
         string currency;
     }
 
-    /// @notice Creation parameters for a Security-variant B-20 token. ABI-encoded into `params`.
+    /// @notice Creation parameters for an Asset-variant B-20 token. ABI-encoded into `params`.
     struct B20AssetCreateParams {
         /// @dev Encoding version. Currently `1`.
         uint8 version;
@@ -82,7 +82,7 @@ interface IB20Factory {
     /// @notice The stablecoin `currency` was non-empty but contained a non-`A`-`Z` byte.
     error InvalidCurrency(string code);
 
-    /// @notice The security `decimals` was outside the allowed inclusive range
+    /// @notice The asset `decimals` was outside the allowed inclusive range
     ///         `[B20Constants.MIN_ASSET_DECIMALS, B20Constants.MAX_ASSET_DECIMALS]`.
     ///
     /// @param decimals Offending decimals value.
@@ -125,9 +125,9 @@ interface IB20Factory {
     /// @dev Reverts with IActivationRegistry.FeatureNotActivated when the variant feature is not activated.
     /// @dev Reverts with `InvalidVariant` when `variant` is outside the `B20Variant` range.
     /// @dev Reverts with `UnsupportedVersion` when the leading `version` byte in `params` is unrecognized for `variant`.
-    /// @dev Reverts with `MissingRequiredField` when a required string field is empty (e.g. stablecoin `currency` or security `isin`).
+    /// @dev Reverts with `MissingRequiredField` when a required string field is empty (e.g. stablecoin `currency`).
     /// @dev Reverts with `InvalidCurrency` when a stablecoin `currency` is non-empty but contains a non-`A`-`Z` byte.
-    /// @dev Reverts with `InvalidDecimals` when a security `decimals` is outside `[B20Constants.MIN_ASSET_DECIMALS, B20Constants.MAX_ASSET_DECIMALS]`.
+    /// @dev Reverts with `InvalidDecimals` when an asset `decimals` is outside `[B20Constants.MIN_ASSET_DECIMALS, B20Constants.MAX_ASSET_DECIMALS]`.
     /// @dev Reverts with `TokenAlreadyExists` when a token already exists at the derived address.
     /// @dev Reverts with `InitCallFailed` (or the bubbled inner reason) when any entry in `initCalls` reverts.
     ///

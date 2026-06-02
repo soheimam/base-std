@@ -106,13 +106,13 @@ contract B20FactoryCreateB20Test is B20FactoryTest {
     }
 
     /// @notice Verifies createToken reverts for any unsupported version byte on the ASSET variant
-    /// @dev Each variant arm has its own version check; this exercises the security arm's check.
+    /// @dev Each variant arm has its own version check; this exercises the asset arm's check.
     ///      The current supported version is `B20_ASSET_CREATE_PARAMS_VERSION` — fuzzing
     ///      assumes the version byte is anything else.
-    function test_createB20_revert_unsupportedVersion_security(address caller, uint8 badVersion, bytes32 salt) public {
+    function test_createB20_revert_unsupportedVersion_asset(address caller, uint8 badVersion, bytes32 salt) public {
         _assumeValidCaller(caller);
         vm.assume(badVersion != B20FactoryLib.B20_ASSET_CREATE_PARAMS_VERSION);
-        IB20Factory.B20AssetCreateParams memory p = _securityParams();
+        IB20Factory.B20AssetCreateParams memory p = _assetParams();
         p.version = badVersion;
         vm.prank(caller);
         vm.expectRevert(
@@ -232,21 +232,21 @@ contract B20FactoryCreateB20Test is B20FactoryTest {
 
     /// @notice Verifies createToken returns the predicted address for the asset variant
     /// @dev Address determinism: returned address must equal getTokenAddress(ASSET, sender, salt)
-    function test_createB20_success_securityMatchesPrediction(address caller, bytes32 salt) public {
+    function test_createB20_success_assetMatchesPrediction(address caller, bytes32 salt) public {
         _assumeValidCaller(caller);
         address predicted = factory.getB20Address(IB20Factory.B20Variant.ASSET, caller, salt);
-        address actual = _createSecurity(caller, salt, _securityParams(), new bytes[](0));
+        address actual = _createAsset(caller, salt, _assetParams(), new bytes[](0));
         assertEq(actual, predicted, "createToken address must match prediction");
     }
 
-    /// @notice Verifies security createToken leaves all base policy slots at their
+    /// @notice Verifies asset createToken leaves all base policy slots at their
     ///         EVM zero defaults (ALWAYS_ALLOW_ID).
     /// @dev The asset variant adds no extra policy slot of its own, and the factory does not
     ///      override any of the base defaults at creation. Paired surface + slot assertions pin
     ///      both the public read path and the underlying packed slot bytes.
-    function test_createB20_success_securityOtherPolicySlotsDefaultToAllow(address caller, bytes32 salt) public {
+    function test_createB20_success_assetOtherPolicySlotsDefaultToAllow(address caller, bytes32 salt) public {
         _assumeValidCaller(caller);
-        address token = _createSecurity(caller, salt, _securityParams(), new bytes[](0));
+        address token = _createAsset(caller, salt, _assetParams(), new bytes[](0));
 
         assertEq(
             IB20Asset(token).policyId(B20Constants.TRANSFER_SENDER_POLICY),
@@ -281,13 +281,13 @@ contract B20FactoryCreateB20Test is B20FactoryTest {
         );
     }
 
-    /// @notice Verifies security createToken executes with admin == address(0)
+    /// @notice Verifies asset createToken executes with admin == address(0)
     /// @dev Same zero-admin success behavior on the asset variant. Paired slot assertions
     ///      cross-check the base namespace (adminCount=0, initialized=true).
-    function test_createB20_success_zeroAdminGrantsNoRole_security(address caller, bytes32 salt) public {
+    function test_createB20_success_zeroAdminGrantsNoRole_asset(address caller, bytes32 salt) public {
         _assumeValidCaller(caller);
-        IB20Factory.B20AssetCreateParams memory p = _securityParams("NoOwner Security", "NOSEC", address(0));
-        address token = _createSecurity(caller, salt, p, new bytes[](0));
+        IB20Factory.B20AssetCreateParams memory p = _assetParams("NoOwner Asset", "NOSEC", address(0));
+        address token = _createAsset(caller, salt, p, new bytes[](0));
 
         assertFalse(MockB20(token).hasRole(B20Constants.DEFAULT_ADMIN_ROLE, address(0)), "zero must not hold admin");
         assertFalse(MockB20(token).hasRole(B20Constants.DEFAULT_ADMIN_ROLE, caller), "caller must not hold admin");
@@ -333,18 +333,18 @@ contract B20FactoryCreateB20Test is B20FactoryTest {
     }
 
     /// @notice Verifies createToken emits B20Created with decimals=6 for the asset variant
-    /// @dev Variant-specific dedicated event test: the security arm pins decimals=6 and asserts
+    /// @dev Variant-specific dedicated event test: the asset arm pins decimals=6 and asserts
     ///      empty `variantEventParams` (ASSET has no variant-specific immutable identity
     ///      fields beyond the base set; extra-metadata entries are mutable and surfaced via
     ///      their own update events).
-    function test_createB20_success_emitsB20Created_security(address caller, bytes32 salt) public {
+    function test_createB20_success_emitsB20Created_asset(address caller, bytes32 salt) public {
         _assumeValidCaller(caller);
-        IB20Factory.B20AssetCreateParams memory p = _securityParams("Security Test", "SEC", admin);
+        IB20Factory.B20AssetCreateParams memory p = _assetParams("Asset Test", "AST", admin);
         address predicted = factory.getB20Address(IB20Factory.B20Variant.ASSET, caller, salt);
 
         vm.expectEmit(true, true, false, true, address(factory));
-        emit IB20Factory.B20Created(predicted, IB20Factory.B20Variant.ASSET, "Security Test", "SEC", 6, bytes(""));
-        _createSecurity(caller, salt, p, new bytes[](0));
+        emit IB20Factory.B20Created(predicted, IB20Factory.B20Variant.ASSET, "Asset Test", "AST", 6, bytes(""));
+        _createAsset(caller, salt, p, new bytes[](0));
     }
 
     /// @notice Verifies createToken emits B20Created with decimals=6 and a non-empty
@@ -547,9 +547,9 @@ contract B20FactoryCreateB20Test is B20FactoryTest {
             "stablecoin variant byte mismatch"
         );
 
-        address securityToken = _createSecurity(caller, salt, _securityParams(), new bytes[](0));
+        address assetToken = _createAsset(caller, salt, _assetParams(), new bytes[](0));
         assertEq(
-            uint256(uint8(uint160(securityToken) >> 72)),
+            uint256(uint8(uint160(assetToken) >> 72)),
             uint256(IB20Factory.B20Variant.ASSET),
             "asset variant byte mismatch"
         );

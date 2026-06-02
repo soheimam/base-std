@@ -12,7 +12,7 @@ import {B20Constants} from "test/lib/mocks/MockB20.sol";
 /// Extends `B20FactoryTest` because an IB20 token cannot exist
 /// without the factory: `setUp` calls `super.setUp()` to etch every
 /// precompile mock (via `BaseTest`) and pick up the factory create
-/// helpers, then deploys a security-variant token here so the token's
+/// helpers, then deploys a asset-variant token here so the token's
 /// identity byte (variant at address `[10]`) matches the real address
 /// schema. In live mode under
 /// `--fork-url`, the same flow hits the real precompile factory.
@@ -40,7 +40,7 @@ contract B20Test is B20FactoryTest {
     address internal burnBlocker = makeAddr("burnBlocker");
 
     // -- Token under test --
-    /// @notice Security-variant `IB20` token deployed in `setUp`.
+    /// @notice Asset-variant `IB20` token deployed in `setUp`.
     IB20 internal token;
 
     // -- Setup --
@@ -57,7 +57,7 @@ contract B20Test is B20FactoryTest {
         vm.label(address(token), "token");
     }
 
-    /// @notice Token-deployment hook. Default impl deploys a security-variant
+    /// @notice Token-deployment hook. Default impl deploys a asset-variant
     ///         token via the factory mock; variant-specific bases (e.g.
     ///         `B20StablecoinTest`) override to deploy their variant while
     ///         reusing every other piece of `B20Test`.
@@ -68,7 +68,7 @@ contract B20Test is B20FactoryTest {
     ///         against the returned `token` (transfer, mint, ...) execute
     ///         against a live mock token with the initial admin granted.
     function _deployToken() internal virtual returns (IB20) {
-        return IB20(_createSecurity());
+        return IB20(_createAsset());
     }
 
     /// @notice Wraps a single `PausableFeature` in a length-1 array for

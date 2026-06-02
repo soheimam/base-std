@@ -12,12 +12,12 @@ contract B20FactoryLibEncodeUpdateExtraMetadataTest is B20FactoryLibTest {
     /// @dev    Pins the selector binding on `IB20Asset` and the
     ///         (string, string) argument order across short- and
     ///         long-string fuzz inputs.
-    function test_encodeUpdateExtraMetadata_success_matchesAbiEncodeCall(
-        string memory identifierType,
-        string memory value
-    ) public pure {
-        bytes memory expected = abi.encodeCall(IB20Asset.updateExtraMetadata, (identifierType, value));
-        bytes memory actual = B20FactoryLib.encodeUpdateExtraMetadata(identifierType, value);
+    function test_encodeUpdateExtraMetadata_success_matchesAbiEncodeCall(string memory key, string memory value)
+        public
+        pure
+    {
+        bytes memory expected = abi.encodeCall(IB20Asset.updateExtraMetadata, (key, value));
+        bytes memory actual = B20FactoryLib.encodeUpdateExtraMetadata(key, value);
         assertEq(actual, expected, "init-call must match abi.encodeCall(IB20Asset.updateExtraMetadata, ...)");
     }
 }

@@ -18,9 +18,7 @@ contract B20AssetUpdateMultiplierTest is B20AssetTest {
         vm.assume(caller != operator);
 
         vm.prank(caller);
-        vm.expectRevert(
-            abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, OPERATOR_ROLE)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, OPERATOR_ROLE));
         security().updateMultiplier(newMultiplier);
     }
 

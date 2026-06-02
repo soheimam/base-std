@@ -20,9 +20,7 @@ contract B20AssetAnnounceTest is B20AssetTest {
         vm.assume(caller != operator);
 
         vm.prank(caller);
-        vm.expectRevert(
-            abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, OPERATOR_ROLE)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, OPERATOR_ROLE));
         security().announce(new bytes[](0), id, "desc", "uri");
     }
 

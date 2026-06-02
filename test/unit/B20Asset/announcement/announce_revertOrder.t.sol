@@ -39,9 +39,7 @@ contract B20AssetAnnounceRevertOrderTest is B20AssetTest {
         // caller lacks OPERATOR_ROLE AND id is already used.
 
         vm.prank(caller);
-        vm.expectRevert(
-            abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, OPERATOR_ROLE)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, OPERATOR_ROLE));
         security().announce(new bytes[](0), id, "desc", "uri");
     }
 
@@ -52,9 +50,7 @@ contract B20AssetAnnounceRevertOrderTest is B20AssetTest {
         // caller lacks role AND would supply a malformed inner call.
 
         vm.prank(caller);
-        vm.expectRevert(
-            abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, OPERATOR_ROLE)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IB20.AccessControlUnauthorizedAccount.selector, caller, OPERATOR_ROLE));
         security().announce(_singletonBytes(MALFORMED_BLOB), id, "desc", "uri");
     }
 

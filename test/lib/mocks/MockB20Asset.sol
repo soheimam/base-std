@@ -12,7 +12,7 @@ import {MockB20AssetStorage, MockB20Storage} from "test/lib/mocks/MockB20Storage
 /// @notice Reference implementation of the `IB20Asset` variant.
 ///         Extends `MockB20` with the announcement bracket,
 ///         multiplier-based scaling, batched issuance, and
-///         security-identifier surfaces; all base behavior is
+///         extra-metadata surfaces; all base behavior is
 ///         inherited unchanged.
 ///
 /// @dev    Variant-specific state lives in `MockB20AssetStorage`'s
@@ -46,9 +46,9 @@ import {MockB20AssetStorage, MockB20Storage} from "test/lib/mocks/MockB20Storage
 ///
 ///         **Factory bootstrap.** Operator and admin gates honor
 ///         `_isPrivileged()` so the factory can stage initial
-///         announcements, batched issuance, multipliers, and identifiers
-///         during the bootstrap window without first granting itself
-///         roles. Token invariants (supply-cap math, balance
+///         announcements, batched issuance, multipliers, and extra-metadata
+///         entries during the bootstrap window without first granting
+///         itself roles. Token invariants (supply-cap math, balance
 ///         accounting) are NOT bypassed anywhere.
 contract MockB20Asset is MockB20, IB20Asset {
     // ============================================================
@@ -159,20 +159,17 @@ contract MockB20Asset is MockB20, IB20Asset {
     }
 
     // ============================================================
-    //                     ASSET IDENTIFIERS
+    //                       EXTRA METADATA
     // ============================================================
 
-    function securityIdentifier(string calldata identifierType) external view returns (string memory) {
-        return MockB20AssetStorage.layout().identifiers[identifierType];
+    function extraMetadata(string calldata key) external view returns (string memory) {
+        return MockB20AssetStorage.layout().extraMetadata[key];
     }
 
-    function updateExtraMetadata(string calldata identifierType, string calldata value)
-        external
-        onlyRole(OPERATOR_ROLE)
-    {
-        if (bytes(identifierType).length == 0) revert InvalidIdentifierType();
-        MockB20AssetStorage.layout().identifiers[identifierType] = value;
-        emit ExtraMetadataUpdated(identifierType, value);
+    function updateExtraMetadata(string calldata key, string calldata value) external onlyRole(METADATA_ROLE) {
+        if (bytes(key).length == 0) revert InvalidMetadataKey();
+        MockB20AssetStorage.layout().extraMetadata[key] = value;
+        emit ExtraMetadataUpdated(key, value);
     }
 
     // ============================================================

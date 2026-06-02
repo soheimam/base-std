@@ -69,6 +69,7 @@ interface IPolicyRegistry {
     /// @notice Creates a new policy with no initial members. Permissionless.
     ///
     /// @dev Reverts with `ZeroAddress` when `admin` is `address(0)`.
+    /// @dev Panics with arithmetic overflow (Panic 0x11) when the policy counter has reached its maximum value.
     ///
     /// @param admin      Initial admin authorized to modify membership and transfer or renounce administration.
     /// @param policyType BLOCKLIST or ALLOWLIST.
@@ -80,6 +81,7 @@ interface IPolicyRegistry {
     ///
     /// @dev Reverts with `ZeroAddress` when `admin` is `address(0)`. Takes precedence over `BatchSizeTooLarge`.
     /// @dev Reverts with `BatchSizeTooLarge` when `accounts.length` exceeds the registry limit.
+    /// @dev Panics with arithmetic overflow (Panic 0x11) when the policy counter has reached its maximum value.
     ///
     /// @param admin      Initial admin authorized to modify membership and transfer or renounce administration.
     /// @param policyType BLOCKLIST or ALLOWLIST.

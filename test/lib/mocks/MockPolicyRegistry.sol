@@ -243,11 +243,9 @@ contract MockPolicyRegistry is IPolicyRegistry {
         _writeBuiltins();
         MockPolicyRegistryStorage.Layout storage $ = MockPolicyRegistryStorage.layout();
         uint56 counter = $.nextCounter;
-        // No overflow guard: at one policy per 2-second block, exhausting the
-        // 56-bit counter space (~7.2e16 values) takes ~4.6 billion years.
-        unchecked {
-            $.nextCounter = counter + 1;
-        }
+        // Solidity checked arithmetic panics with Panic(0x11) on uint56 overflow,
+        // matching the Rust precompile which reverts with Panic(UnderOverflow) at COUNTER_MASK.
+        $.nextCounter = counter + 1;
         newPolicyId = _makeId({policyType: policyType, counter: counter});
         $.policies[newPolicyId] = _encode(admin);
         emit PolicyCreated(newPolicyId, msg.sender, policyType);

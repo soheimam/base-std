@@ -60,10 +60,62 @@ jobs:
       - name: Capture coverage summary
         id: summary
         run: |
-          output=$(forge coverage --no-match-coverage "(\.t\.sol|Test\.sol)$" 2>/dev/null | grep "^|" || echo "| (no coverage data) |")
+          raw=$(forge coverage --no-match-coverage "(\.t\.sol|Test\.sol)$" 2>/dev/null | grep "^|" || echo "")
+
+          if [ -z "$raw" ]; then
+            status="⚠️ Coverage data unavailable."
+            table="_(no coverage data)_"
+          else
+            # Per-row color: 🟢 ≥99% on all metrics, 🟡 ≥95%, 🔴 below 95%
+            table=$(echo "$raw" | awk -v GREEN="🟢" -v YELLOW="🟡" -v RED="🔴" -F'|' '
+              BEGIN {
+                print "| File | Lines | Stmts | Branches | Funcs |"
+                print "|------|-------|-------|----------|-------|"
+              }
+              /\+/ { next }
+              /% Lines/ { next }
+              NF < 5 { next }
+              {
+                file = $2
+                gsub(/^[[:space:]]+|[[:space:]]+$/, "", file)
+                if (file == "") next
+                for (i = 3; i <= 6; i++) {
+                  match($i, /[0-9]+\.[0-9]+%/)
+                  pct[i-2] = substr($i, RSTART, RLENGTH)
+                }
+                gsub(/^test\/lib\/mocks\//, "", file)
+                gsub(/^src\/lib\//, "", file)
+                if (file == "Total") {
+                  printf "| **%s** | **%s** | **%s** | **%s** | **%s** |\n", file, pct[1], pct[2], pct[3], pct[4]
+                } else {
+                  min_pct = 999
+                  for (j = 1; j <= 4; j++) {
+                    val = pct[j]; gsub(/%/, "", val); val += 0
+                    if (val < min_pct) min_pct = val
+                  }
+                  if (min_pct >= 99)      emoji = GREEN
+                  else if (min_pct >= 95) emoji = YELLOW
+                  else                    emoji = RED
+                  printf "| %s %s | %s | %s | %s | %s |\n", emoji, file, pct[1], pct[2], pct[3], pct[4]
+                }
+              }
+            ')
+
+            # Status line uses same thresholds applied to Total row minimum
+            total=$(echo "$raw" | grep "^| Total" || echo "")
+            min_total=$(echo "$total" | grep -oE "[0-9]+\.[0-9]+%" | sed 's/%//' | sort -n | head -1)
+            status=$(echo "$min_total" | awk '{
+              if      ($1 >= 99) print "🟢 ≥99% across all metrics."
+              else if ($1 >= 95) print "🟡 ≥95% across all metrics \xe2\x80\x94 some metrics below 99%."
+              else               print "🔴 Below 95% on one or more metrics."
+            }')
+            [ -z "$status" ] && status="⚠️ Coverage data unavailable."
+          fi
+
           {
-            echo "output<<__EOF__"
-            echo "$output"
+            echo "status=$status"
+            echo "table<<__EOF__"
+            printf "%s\n" "$table"
             echo "__EOF__"
           } >> "$GITHUB_OUTPUT"
 
@@ -91,11 +143,11 @@ jobs:
           edit-mode: replace
           body: |
             <!-- forge-coverage -->
-            ### Forge Coverage (`src/lib/`)
+            ### 📊 Forge Coverage (`src/lib/`)
 
-            ```
-            ${{ steps.summary.outputs.output }}
-            ```
+            ${{ steps.summary.outputs.status }}
+
+            ${{ steps.summary.outputs.table }}
 
             Full report: [download artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}). To browse locally: `make coverage` (runs forge coverage + genhtml + opens the HTML report).
 
@@ -151,9 +203,7 @@ jobs:
 
             ${{ steps.check.outputs.exit_code == '0' && '✅ All interface functions have test coverage.' || '❌ Interface functions with no test coverage found.' }}
 
-            ```
-            ${{ steps.check.outputs.output }}
-            ```
+            ${{ steps.check.outputs.exit_code != '0' && format('```\n{0}\n```', steps.check.outputs.output) || '' }}
 
       - name: Fail if gaps found
         if: steps.check.outputs.exit_code != '0'

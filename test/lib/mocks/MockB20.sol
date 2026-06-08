@@ -304,15 +304,16 @@ abstract contract MockB20 is IB20 {
         whenNotPaused(PausableFeature.BURN)
         onlyRole(BURN_BLOCKED_ROLE)
     {
-        if (!_isPrivileged()) {
-            // The point of burnBlocked is to seize from policy-blocked
-            // accounts. Read the transfer-sender policy ID out of the
-            // transfer-side packed slot and reject if the target is
-            // currently authorized.
-            uint64 senderPolicyId = MockB20Storage.layout().transferPolicyIds.sender;
-            if (IPolicyRegistry(POLICY_REGISTRY).isAuthorized(senderPolicyId, from)) {
-                revert AccountNotBlocked(from);
-            }
+        // The point of burnBlocked is to seize from policy-blocked
+        // accounts. Read the transfer-sender policy ID out of the
+        // transfer-side packed slot and reject if the target is
+        // currently authorized. Enforced unconditionally — including
+        // for factory-originated calls during the bootstrap window —
+        // matching the Rust precompile, which carves no `privileged`
+        // exception for this guard.
+        uint64 senderPolicyId = MockB20Storage.layout().transferPolicyIds.sender;
+        if (IPolicyRegistry(POLICY_REGISTRY).isAuthorized(senderPolicyId, from)) {
+            revert AccountNotBlocked(from);
         }
         _burnRaw(from, amount);
         emit BurnedBlocked(msg.sender, from, amount);
@@ -737,18 +738,25 @@ abstract contract MockB20 is IB20 {
         emit Transfer(from, to, amount);
     }
 
-    /// @dev Pure mechanics: policy (with bootstrap bypass) + supply cap
-    ///      + effects. Pause, role, and the zero-receiver check are
-    ///      enforced upstream by `mint` / `mintWithMemo`. The asset
-    ///      variant's `batchMint` carries the same `whenNotPaused` +
-    ///      `onlyRole` modifiers ONCE for the whole batch and validates
-    ///      per-element receivers inline before invoking this helper.
+    /// @dev Pure mechanics: policy + supply cap + effects. Pause, role,
+    ///      and the zero-receiver check are enforced upstream by `mint`
+    ///      / `mintWithMemo`. The asset variant's `batchMint` carries
+    ///      the same `whenNotPaused` + `onlyRole` modifiers ONCE for the
+    ///      whole batch and validates per-element receivers inline
+    ///      before invoking this helper.
+    ///
+    ///      MINT_RECEIVER_POLICY is enforced unconditionally — including
+    ///      for factory-originated mints during the bootstrap window —
+    ///      matching the Rust precompile, which carves no `privileged`
+    ///      exception for the receiver-policy check. An unconfigured
+    ///      slot reads as `ALWAYS_ALLOW_ID`, so the default-deploy
+    ///      bootstrap flow is unaffected; only initCalls that set a
+    ///      restrictive `MINT_RECEIVER_POLICY` first AND then mint to a
+    ///      non-authorized account see the (correct) revert.
     function _mint(address to, uint256 amount) internal {
-        if (!_isPrivileged()) {
-            uint64 mintReceiverPolicyId = MockB20Storage.layout().mintPolicyIds.receiver;
-            if (!IPolicyRegistry(POLICY_REGISTRY).isAuthorized(mintReceiverPolicyId, to)) {
-                revert PolicyForbids(MINT_RECEIVER_POLICY, mintReceiverPolicyId);
-            }
+        uint64 mintReceiverPolicyId = MockB20Storage.layout().mintPolicyIds.receiver;
+        if (!IPolicyRegistry(POLICY_REGISTRY).isAuthorized(mintReceiverPolicyId, to)) {
+            revert PolicyForbids(MINT_RECEIVER_POLICY, mintReceiverPolicyId);
         }
 
         MockB20Storage.Layout storage $ = MockB20Storage.layout();

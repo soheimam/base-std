@@ -199,6 +199,14 @@ contract B20TransferFromWithMemoTest is B20Test {
         uint256 spendAmount,
         bytes32 memo
     ) public {
+        // Mock-only by necessity. This pins a privileged (factory bootstrap) transferFromWithMemo
+        // that consumes a pre-existing third-party allowance (allowance[from][factory], from !=
+        // factory). Such an allowance can only be set by `from` calling approve, which requires the
+        // token to already exist with the bootstrap window CLOSED, yet the privileged path requires
+        // the window OPEN (during which the factory is the only caller). The two states are mutually
+        // exclusive in any real sequence, so there is no fork-reachable construction. The mock
+        // observes it only by reopening the window via vm.store, which has no live-precompile analog.
+        vm.skip(vm.envOr("LIVE_PRECOMPILES", false));
         _assumeValidActor(from);
         _assumeValidActor(to);
         allowanceAmount = bound(allowanceAmount, 0, type(uint128).max - 1);
@@ -229,6 +237,10 @@ contract B20TransferFromWithMemoTest is B20Test {
         uint256 spendAmount,
         bytes32 memo
     ) public {
+        // Mock-only by necessity: see test_transferFromWithMemo_revert_privileged_insufficientAllowance.
+        // The privileged path needs a pre-existing allowance[from][factory] that cannot be
+        // established inside the atomic bootstrap window, so there is no fork-reachable construction.
+        vm.skip(vm.envOr("LIVE_PRECOMPILES", false));
         _assumeValidActor(from);
         _assumeValidActor(to);
         vm.assume(from != to);

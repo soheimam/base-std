@@ -393,6 +393,14 @@ contract B20TransferFromTest is B20Test {
         uint256 allowanceAmount,
         uint256 spendAmount
     ) public {
+        // Mock-only by necessity. This pins a privileged (factory bootstrap) transferFrom that
+        // consumes a pre-existing third-party allowance (allowance[from][factory], from != factory).
+        // Such an allowance can only be set by `from` calling approve, which requires the token to
+        // already exist with the bootstrap window CLOSED, yet the privileged path requires the
+        // window OPEN (during which the factory is the only caller). The two states are mutually
+        // exclusive in any real sequence, so there is no fork-reachable construction. The mock
+        // observes it only by reopening the window via vm.store, which has no live-precompile analog.
+        vm.skip(vm.envOr("LIVE_PRECOMPILES", false));
         _assumeValidActor(from);
         _assumeValidActor(to);
         allowanceAmount = bound(allowanceAmount, 0, type(uint128).max - 1);
@@ -422,6 +430,10 @@ contract B20TransferFromTest is B20Test {
         uint256 allowanceAmount,
         uint256 spendAmount
     ) public {
+        // Mock-only by necessity: see test_transferFrom_revert_privileged_insufficientAllowance.
+        // The privileged path needs a pre-existing allowance[from][factory] that cannot be
+        // established inside the atomic bootstrap window, so there is no fork-reachable construction.
+        vm.skip(vm.envOr("LIVE_PRECOMPILES", false));
         _assumeValidActor(from);
         _assumeValidActor(to);
         vm.assume(from != to);
@@ -450,5 +462,37 @@ contract B20TransferFromTest is B20Test {
             allowanceAmount - spendAmount,
             "allowances[from][factory] slot must reflect the consumed amount"
         );
+    }
+
+    /// @notice Verifies a privileged transferFrom bypasses the executor policy while still consuming allowance
+    /// @dev Companion to test_transferFrom_success_privileged_decrementsAllowance (which pins allowance
+    ///      accounting): this isolates the executor-policy bypass. With TRANSFER_EXECUTOR_POLICY set to
+    ///      ALWAYS_BLOCK a non-privileged transferFrom reverts PolicyForbids; the privileged (factory
+    ///      bootstrap) path must succeed and still burn the allowance. Only the executor-policy check
+    ///      honors the privileged bypass — the allowance is consumed unconditionally (BOP-230 / L-04).
+    function test_transferFrom_success_privileged_skipsExecutorPolicy(address from, address to, uint256 amount) public {
+        // Mock-only by necessity: like test_transferFrom_revert_privileged_insufficientAllowance,
+        // the privileged path needs a pre-existing allowance[from][factory] (from != factory) that
+        // cannot be set inside the atomic bootstrap window (the factory is the only in-window
+        // caller). No fork-reachable construction exists; the mock reaches it via vm.store.
+        vm.skip(vm.envOr("LIVE_PRECOMPILES", false));
+        _assumeValidActor(from);
+        _assumeValidActor(to);
+        vm.assume(from != to);
+        amount = bound(amount, 1, type(uint128).max);
+
+        _mint(from, amount);
+        vm.prank(from);
+        token.approve(address(factory), amount);
+        _setPolicy(B20Constants.TRANSFER_EXECUTOR_POLICY, PolicyRegistryConstants.ALWAYS_BLOCK_ID);
+
+        // Reopen the factory bootstrap window so the factory caller is privileged.
+        vm.store(address(token), MockB20Storage.initializedSlot(), bytes32(0));
+
+        vm.prank(address(factory));
+        token.transferFrom(from, to, amount);
+
+        assertEq(token.balanceOf(to), amount, "privileged transferFrom must succeed despite blocked executor policy");
+        assertEq(token.allowance(from, address(factory)), 0, "allowance must still be consumed under privilege");
     }
 }

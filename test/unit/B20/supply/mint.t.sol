@@ -127,4 +127,36 @@ contract B20MintTest is B20Test {
         vm.prank(minter);
         token.mint(to, amount);
     }
+
+    /// @notice Verifies mint succeeds when totalSupply + amount equals supplyCap exactly
+    /// @dev Boundary companion to test_mint_revert_supplyCapExceeded (which only exercises
+    ///      cap + 1). The `> supplyCap` guard must admit the exact-cap case; minting to the cap
+    ///      leaves totalSupply == cap.
+    function test_mint_success_atSupplyCapBoundary(address to, uint256 cap) public {
+        _assumeValidActor(to);
+        cap = bound(cap, 1, type(uint128).max);
+
+        vm.prank(admin);
+        token.updateSupplyCap(cap);
+
+        _mint(to, cap);
+
+        assertEq(token.totalSupply(), cap, "totalSupply must reach exactly the cap");
+        assertEq(token.balanceOf(to), cap, "recipient must hold exactly the cap");
+    }
+
+    /// @notice Verifies sequential mints to the same recipient accumulate additively
+    /// @dev Pins that mint is additive rather than last-write-wins: two mints credit the running
+    ///      balance and totalSupply by the sum of both amounts.
+    function test_mint_success_accumulatesAcrossCalls(address to, uint256 first, uint256 second) public {
+        _assumeValidActor(to);
+        first = bound(first, 0, type(uint128).max);
+        second = bound(second, 0, type(uint128).max);
+
+        _mint(to, first);
+        _mint(to, second);
+
+        assertEq(token.balanceOf(to), first + second, "balance must equal the sum of both mints");
+        assertEq(token.totalSupply(), first + second, "totalSupply must equal the sum of both mints");
+    }
 }

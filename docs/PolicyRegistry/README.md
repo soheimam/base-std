@@ -26,6 +26,29 @@ Custom policy IDs are assigned from a single global counter starting at `2`. The
 
 > **Precondition for consumers.** `isAuthorized` never reverts on a non-existent or malformed `policyId` — it collapses to empty-member-set semantics (ALLOWLIST → `false`, BLOCKLIST → `true`). Consumers that store policy IDs (notably `IB20.updatePolicy`) MUST validate `policyExists(policyId)` at write time, since a typo'd BLOCKLIST ID would silently behave as `ALWAYS_ALLOW`.
 
+## Activation
+
+The `PolicyRegistry` is gated by the [`ActivationRegistry`](../ActivationRegistry/README.md). The gate applies only to functions that change state; read-only functions are always callable, whether or not the feature is active.
+
+**Always callable:**
+
+- `isAuthorized`
+- `policyExists`
+- `policyAdmin`
+- `pendingPolicyAdmin`
+
+**Gated** — revert with `FeatureNotActivated` while the feature is inactive:
+
+- `createPolicy`
+- `createPolicyWithAccounts`
+- `stageUpdateAdmin`
+- `finalizeUpdateAdmin`
+- `renounceAdmin`
+- `updateAllowlist`
+- `updateBlocklist`
+
+Because reads are never gated, a consumer — a B20 token calling `isAuthorized` on transfer, or an indexer reading membership and admin state — sees the same behavior whether or not the feature is active.
+
 ## User Flows
 
 ### Create Policy

@@ -31,6 +31,8 @@ against a local single node and a live pooled endpoint without changes.
 
 ## Running
 
+Requires **Python 3.13** (`make smoke-setup` enforces it; override with `PYTHON=`).
+
 ```bash
 make smoke-setup                 # one-time: create the venv + install web3
 cp .env.template .env            # then set RPC_URL, DEPLOYER_PK, USER2_PK

@@ -14,7 +14,7 @@ import {B20FactoryTest} from "base-std-test/lib/B20FactoryTest.sol";
 ///         decoding, or any other validation — so value-bearing calls never advance past
 ///         the pre-flight check regardless of the calldata they carry.
 ///
-/// @dev Tests in this file are skipped in fork mode until base/base#3362 (the nonpayable
+/// @dev Tests in this file are skipped in live precompile mode until base/base#3362 (the nonpayable
 ///      guard implementation) is merged and deployed: before that PR the live precompile
 ///      silently accepts ETH-bearing calls.
 contract B20FactoryNonPayableTest is B20FactoryTest {
@@ -26,7 +26,7 @@ contract B20FactoryNonPayableTest is B20FactoryTest {
     /// @notice Verifies `createB20` reverts with `NonPayable` when ETH is attached.
     /// @dev Arbitrary value, variant, and calldata: the guard fires before decoding.
     function test_createB20_revert_nonPayable(address caller, uint256 value, bytes32 salt) public {
-        vm.skip(vm.envOr("LIVE_PRECOMPILES", false));
+        vm.skip(livePrecompiles);
         _assumeValidCaller(caller);
         vm.assume(value != 0);
         vm.deal(caller, value);
@@ -44,7 +44,7 @@ contract B20FactoryNonPayableTest is B20FactoryTest {
     function test_createB20_revertOrder_nonPayable_beats_activation(address caller, uint256 value, bytes32 salt)
         public
     {
-        vm.skip(vm.envOr("LIVE_PRECOMPILES", false));
+        vm.skip(livePrecompiles);
         _assumeValidCaller(caller);
         vm.assume(value != 0);
         vm.deal(caller, value);
